@@ -26,10 +26,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: MyHomePage(),
 
-      // home: Scaffold(
-      //   body: MyHomePage(),
-      //   floatingActionButton: floatingButtons(),
-      // ),
     );
   }
 }
@@ -59,6 +55,18 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        // title: Image.asset('images/logo.png', height: 150,),
+        flexibleSpace: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image.asset('images/logo.png', height: 300, fit: BoxFit.cover),
+            // SizedBox(width: 10), // 이미지 간의 간격 조정
+            Image.asset('images/magu.png', height: 150,),
+          ]
+        ),
+      ),
+
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,

@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  syncfusion_flutter_calendar: ^25.1.42
+  syncfusion_flutter_calendar: ^25.2.5
   flutter_speed_dial: ^7.0.0
   # 백엔드 연결
 #  aws_s3_plugin: ^0.3.0
@@ -68,8 +68,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+     # 사진 가져오기
+     - images/logo.png
+     - images/magu.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
