@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 
-// 깃허브 테스트
+// 깃허브 테스트2
 
 void main() => runApp(MyApp());
 
