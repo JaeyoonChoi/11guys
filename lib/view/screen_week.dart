@@ -2,57 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
 
-
 class WeekScreen extends StatelessWidget {
+  final String username;
+  final AppointmentDataSource dataSource; // 추가된 부분
+
+  WeekScreen({required this.username, required this.dataSource}); // 수정된 부분
 
   @override
   Widget build(BuildContext context) {
-
-    return MaterialApp(
-        home: Scaffold(                                      // 상중하 분리
-          // appBar: AppBar(),                                       //상
-          body: Container(                                                        // 중
-              child: SfCalendar(
-                view: CalendarView.week,
-                showNavigationArrow: true,
-                dataSource: getCalendarDataSource(),
-                // Drag & Drop
-                allowDragAndDrop: true,
-                onDragStart: dragStart,
-                onDragUpdate: dragUpdate,
-                onDragEnd: dragEnd,
-                // Appointment resize
-                allowAppointmentResize: true,
-                onAppointmentResizeStart: resizeStart,
-                onAppointmentResizeUpdate: resizeUpdate,
-                onAppointmentResizeEnd: resizeEnd,
-                // Change time ruler size
-                timeSlotViewSettings: TimeSlotViewSettings(
-                  timeIntervalHeight: -1,
-                  // Minimum appointment duration
-                  minimumAppointmentDuration: Duration(minutes: 10),
-                ),
-
-              ),
+    return Scaffold(
+      body: Container(
+        child: SfCalendar(
+          view: CalendarView.week,
+          showNavigationArrow: true,
+          dataSource: dataSource, // 수정된 부분
+          allowDragAndDrop: true,
+          onDragStart: dragStart,
+          onDragUpdate: dragUpdate,
+          onDragEnd: dragEnd,
+          allowAppointmentResize: true,
+          onAppointmentResizeStart: resizeStart,
+          onAppointmentResizeUpdate: resizeUpdate,
+          onAppointmentResizeEnd: resizeEnd,
+          timeSlotViewSettings: TimeSlotViewSettings(
+            timeIntervalHeight: -1,
+            minimumAppointmentDuration: Duration(minutes: 10),
           ),
-
-          //화면 전환
-          // floatingActionButton: FloatingActionButton(
-          //   child: Icon(Icons.swap_horiz),
-          //   onPressed: (){
-          //     Navigator.pop(
-          //       context
-          //       // context,
-          //       // MaterialPageRoute(builder: (context) => NextScreen()),
-          //     );
-          //   },
-          // ),
-          // bottomNavigationBar: BottomAppBar( child: Text('0'),),                    //하
-        )
+        ),
+      ),
     );
   }
 }
-
 
 // Drag & Drop
 void dragStart(AppointmentDragStartDetails appointmentDragStartDetails) {
@@ -72,10 +52,8 @@ void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
   CalendarResource? targetResource = appointmentDragEndDetails.targetResource;
   DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
 }
-//데이터 베이스 업데이트
 
-
-//onAppointmentResizeStart
+// onAppointmentResizeStart
 void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
   dynamic appointment = appointmentResizeStartDetails.appointment;
   CalendarResource? resource = appointmentResizeStartDetails.resource;
@@ -92,4 +70,3 @@ void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
   DateTime? endTime = appointmentResizeEndDetails.endTime;
   CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
 }
-// 데이터베이스 업데이트
