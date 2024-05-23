@@ -30,6 +30,24 @@ _AppointmentDataSource getCalendarDataSource() {
     endTimeZone: '',
   ));
 
+  appointments.add(Appointment(
+      startTime: DateTime(2024,5,10,9,0),
+      endTime: DateTime(2024,5,10,11,0),
+    subject: 'test',
+    color: Color.fromARGB(128, 0, 0, 255),  // 반투명
+    startTimeZone: '',
+    endTimeZone: '',
+  ));
+
+  appointments.add(Appointment(
+    startTime: DateTime(2024,5,10,7,0),
+    endTime: DateTime(2024,5,10,12,0),
+    subject: 'test',
+    color: Color.fromARGB(128, 0, 0, 255),  // 반투명
+    startTimeZone: '',
+    endTimeZone: '',
+  ));
+
 
   return _AppointmentDataSource(appointments);
 }

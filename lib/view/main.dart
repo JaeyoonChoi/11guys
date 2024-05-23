@@ -16,7 +16,7 @@ import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 // 깃허브 테스트2
 // 오세욱 테스트
 
-void main() => runApp(MyApp());
+// void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override

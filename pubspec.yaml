@@ -36,6 +36,7 @@ dependencies:
 #  aws_s3_plugin: ^0.3.0
   path_provider: ^2.0.11
   flutter_sound: ^9.4.11
+  http: ^1.2.1
 
   # permission
   permission_handler: ^11.3.1
