@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:calendar_final/view/main.dart';
 
 void main() {
@@ -64,8 +63,9 @@ class _LoginPageState extends State<LoginPage> {
     if (loginSuccess) {
       Navigator.push(
         context,
-        // MaterialPageRoute(builder: (context) => HomePage()),
-        MaterialPageRoute(builder: (context) => MyApp()),
+        MaterialPageRoute(
+          builder: (context) => MyApp(username: username, password: password), // 전달
+        ),
       );
     } else {
       showDialog(
