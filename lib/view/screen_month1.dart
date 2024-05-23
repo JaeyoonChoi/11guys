@@ -20,26 +20,16 @@ class MonthScreen extends StatelessWidget {
           child: SfCalendar(
             view: CalendarView.month,
             monthViewSettings: MonthViewSettings(
-                showAgenda: true,
-                appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
-                numberOfWeeksInView: 4),
+              showTrailingAndLeadingDates: false,
+              // navigationDirection: MonthNavigationDirection.horizontal,   // 슬라이드 가로
+              showAgenda: true,
+              appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+              // numberOfWeeksInView: 4,    // 요놈이 없어야 이번 달만 표시됨
+              ),
             dataSource: dataSource,
             showNavigationArrow: true,
           ),
         ),
-        // FAB
-        // floatingActionButton: FloatingActionButton(
-        //   child: Icon(Icons.add),
-        //   onPressed: (){
-        //     month-week 전환
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(builder: (context) => WeekScreen(username: username)), // username 전달
-        //     );
-        //   },
-        // ),
-        // bottomNavigationBar: BottomAppBar( child: Text('0'),), //하
-        // bottomNavigationBar: BottomNavigationBarExample(),
       ),
     );
   }

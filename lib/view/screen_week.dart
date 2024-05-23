@@ -53,6 +53,9 @@ void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
   DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
 }
 
+
+
+
 // onAppointmentResizeStart
 void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
   dynamic appointment = appointmentResizeStartDetails.appointment;
@@ -70,3 +73,4 @@ void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
   DateTime? endTime = appointmentResizeEndDetails.endTime;
   CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
 }
+
