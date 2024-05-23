@@ -166,7 +166,21 @@ Widget floatingButtons() {
               fontSize: 13.0),
           backgroundColor: Colors.blueAccent,
           labelBackgroundColor: Colors.blueAccent,
-          onTap: () {}),
+          onTap: () {}
+      ),
+
+            SpeedDialChild(
+        child: const Icon(
+          Icons.screenshot,
+          color: Colors.white,
+        ),
+        label: "캡처 입력",
+        backgroundColor: Colors.blueAccent,
+        labelBackgroundColor: Colors.blueAccent,
+        labelStyle: const TextStyle(
+            fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
+        onTap: () {},
+      ),
 
       SpeedDialChild(
         child: const Icon(
@@ -179,7 +193,9 @@ Widget floatingButtons() {
         labelStyle: const TextStyle(
             fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
         onTap: () {},
-      )
+      ),
+
+
     ],
   );
 }

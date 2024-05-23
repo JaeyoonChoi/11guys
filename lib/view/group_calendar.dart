@@ -32,10 +32,10 @@ Widget floatingButtons() {
         child: const Icon(Icons.group, color: Colors.white),
         label: "그룹 만들기",
         labelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
           color: Colors.white,
           fontSize: 13.0,
-          fontFamily: 'HancomMalangMalang',),
+          fontFamily: 'HancomMalangMalang',
+          fontWeight: FontWeight.w100), // font 굵기 조정
         backgroundColor: Colors.green,
         labelBackgroundColor: Colors.green,
         // @준식
