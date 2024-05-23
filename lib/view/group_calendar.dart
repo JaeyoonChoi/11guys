@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 //FAB
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
@@ -39,7 +38,8 @@ Widget floatingButtons() {
           fontFamily: 'HancomMalangMalang',),
         backgroundColor: Colors.green,
         labelBackgroundColor: Colors.green,
-        onTap: () {}
+        // @준식
+        onTap: () {}    // onTap이 눌렀을 때 실행되는 거
       ),
     ]
   );
