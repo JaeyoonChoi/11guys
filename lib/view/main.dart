@@ -93,7 +93,7 @@ class MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: floatingButtons(),
+      floatingActionButton: _selectedIndex == 2 ? null : floatingButtons(),
     );
   }
 }
