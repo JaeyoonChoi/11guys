@@ -31,7 +31,7 @@ Widget floatingButtons() {
     children: [
       SpeedDialChild(
         child: const Icon(Icons.group, color: Colors.white),
-        label: "그룹 만들기2",
+        label: "그룹 만들기",
         labelStyle: const TextStyle(
           fontWeight: FontWeight.w500,
           color: Colors.white,
