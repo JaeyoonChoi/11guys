@@ -5,7 +5,6 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 // List 예시
 List<CalendarResource> resourceColl = <CalendarResource>[];
 
-
 // DataBase
 // List 관리
 _AppointmentDataSource getCalendarDataSource() {
