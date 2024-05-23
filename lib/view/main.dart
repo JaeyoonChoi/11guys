@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:calendar_final/view/screen_month1.dart';
 import 'package:calendar_final/view/screen_week.dart';
+import 'package:calendar_final/view/group_calendar.dart';
+
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,7 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 
 // 깃허브 테스트2
-// 최재윤 테스트
+// 오세욱 테스트
 
 void main() => runApp(MyApp());
 
@@ -116,8 +119,8 @@ class Page2 extends StatelessWidget {
 class Page3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('시간매칭'),
+    return MaterialApp(
+      home: group_calendar(),
     );
   }
 }
