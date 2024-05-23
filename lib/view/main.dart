@@ -1,49 +1,38 @@
 import 'package:flutter/material.dart';
-
 import 'package:calendar_final/view/screen_month1.dart';
 import 'package:calendar_final/view/screen_week.dart';
 import 'package:calendar_final/view/group_calendar.dart';
-
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-// permission_handler
-import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
-
-// 깃허브 테스트2
-// 오세욱 테스트
-
-// void main() => runApp(MyApp());
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:calendar_final/provider/appointment_control.dart'; // 추가된 부분
 
 class MyApp extends StatelessWidget {
   final String username;
-  final String password; // 필요시 추가
+  final String password;
 
-  MyApp({required this.username, required this.password}); // 수정된 부분
+  MyApp({required this.username, required this.password});
 
   @override
   Widget build(BuildContext context) {
-    // 앱이 시작할 때 권한을 요청합니다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       requestMicrophonePermission();
     });
 
     return MaterialApp(
-      home: MyHomePage(username: username), // 수정된 부분
+      home: MyHomePage(username: username),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final String username; // 수정된 부분
+  final String username;
 
-  MyHomePage({required this.username}); // 수정된 부분
+  MyHomePage({required this.username});
 
   @override
   MyHomePageState createState() => MyHomePageState();
@@ -51,54 +40,26 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  List<Appointment> _appointments = []; // 추가된 부분
+  List<Appointment> _appointments = [];
+  late List<Widget> _pages;
+  late AppointmentDataSource _dataSource; // 추가된 부분
 
-  final List<Widget> _pages = [
-    Page1(),
-    Page2(),
-    Page3(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _dataSource = getCalendarDataSource(_appointments); // 추가된 부분
+    _pages = [
+      Page1(username: widget.username, dataSource: _dataSource), // 수정된 부분
+      Page2(username: widget.username, dataSource: _dataSource), // 수정된 부분
+      Page3(username: widget.username), // 수정된 부분
+    ];
+    _refreshAppointments();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  String formatDateTime(DateTime date, TimeOfDay time) {
-    final formattedDate = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
-    final formattedTime = "${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}";
-    return formattedDate + formattedTime;
-  }
-
-  void _insertSchedule(String subject, String startDateTime, String endDateTime) async {
-    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
-
-    Map<String, dynamic> requestBody = {
-      'function': 'insert',
-      'id': widget.username, // 수정된 부분
-      'subject': subject, // 일정명 추가
-      'start': startDateTime,
-      'end': endDateTime,
-      'color': 'blue', // 색상은 임의로 지정
-    };
-
-    final response = await http.post(
-      Uri.parse(lambdaArn),
-      body: jsonEncode(requestBody),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result['success']) {
-        print('Insert successful');
-      } else {
-        print('Insert failed');
-      }
-    } else {
-      print('Error: ${response.statusCode}');
-    }
   }
 
   Future<void> _refreshAppointments() async {
@@ -121,10 +82,10 @@ class MyHomePageState extends State<MyHomePage> {
         List<dynamic> appointmentsJson = result['appointments'];
         List<Appointment> newAppointments = appointmentsJson.map((json) {
           return Appointment(
-            startTime: DateTime.parse(json['start']),
-            endTime: DateTime.parse(json['end']),
+            startTime: parseCustomDateTime(json['start']), // 커스텀 파서 사용
+            endTime: parseCustomDateTime(json['end']), // 커스텀 파서 사용
             subject: json['subject'],
-            color: Colors.blue,  // 색상은 json에서 가져오도록 수정 가능
+            color: Colors.blue, // 색상은 json에서 가져오도록 수정 가능
             startTimeZone: '',
             endTimeZone: '',
           );
@@ -132,12 +93,32 @@ class MyHomePageState extends State<MyHomePage> {
 
         setState(() {
           _appointments = newAppointments;
+          _dataSource = getCalendarDataSource(_appointments); // 데이터 소스 갱신
+          _pages = [
+            Page1(username: widget.username, dataSource: _dataSource), // 수정된 부분
+            Page2(username: widget.username, dataSource: _dataSource), // 수정된 부분
+            Page3(username: widget.username), // 수정된 부분
+          ];
         });
       } else {
         print('Failed to fetch appointments');
       }
     } else {
       print('Error: ${response.statusCode}');
+    }
+  }
+
+  DateTime parseCustomDateTime(String dateTimeString) {
+    try {
+      // 예: 202405240113 -> 2024-05-24 01:13
+      int year = int.parse(dateTimeString.substring(0, 4));
+      int month = int.parse(dateTimeString.substring(4, 6));
+      int day = int.parse(dateTimeString.substring(6, 8));
+      int hour = int.parse(dateTimeString.substring(8, 10));
+      int minute = int.parse(dateTimeString.substring(10, 12));
+      return DateTime(year, month, day, hour, minute);
+    } catch (e) {
+      throw FormatException('Invalid date format: $dateTimeString');
     }
   }
 
@@ -316,32 +297,42 @@ class MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-}
 
-class Page1 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MonthScreen(),
-    );
+  String formatDateTime(DateTime date, TimeOfDay time) {
+    final formattedDate = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
+    final formattedTime = "${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}";
+    return formattedDate + formattedTime;
   }
-}
 
-class Page2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: WeekScreen(),
-    );
-  }
-}
+  void _insertSchedule(String subject, String startDateTime, String endDateTime) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
-class Page3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: group_calendar(),
+    Map<String, dynamic> requestBody = {
+      'function': 'insert',
+      'id': widget.username,
+      'subject': subject,
+      'start': startDateTime,
+      'end': endDateTime,
+      'color': 'blue',
+    };
+
+    final response = await http.post(
+      Uri.parse(lambdaArn),
+      body: jsonEncode(requestBody),
+      headers: {'Content-Type': 'application/json'},
     );
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body);
+      if (result['success']) {
+        print('Insert successful');
+        _refreshAppointments(); // 새로 추가된 일정도 새로고침
+      } else {
+        print('Insert failed');
+      }
+    } else {
+      print('Error: ${response.statusCode}');
+    }
   }
 }
 
@@ -350,16 +341,10 @@ Future<void> requestMicrophonePermission() async {
   var status = await Permission.microphone.status;
   if (!status.isGranted) {
     status = await Permission.microphone.request();
-    if (status.isGranted) {
-      // 권한이 허용되었습니다.
-    } else if (status.isDenied) {
-      // 사용자가 권한 요청을 거부했습니다.
-    } else if (status.isPermanentlyDenied) {
-      // 사용자가 권한 요청을 영구적으로 거부했습니다. 설정에서 직접 변경해야 합니다.
-      openAppSettings(); // 사용자를 앱 설정으로 이동시킵니다.
+
     }
   }
-}
+
 
 // 음성녹음
 class SoundRecorder {
@@ -384,10 +369,49 @@ class SoundRecorder {
     if (!_isRecorderInitialized) return;
 
     final dir = await getApplicationDocumentsDirectory();
-    final path = '${dir.path}/flutter_sound_record_${DateTime
-        .now()
-        .millisecondsSinceEpoch}.aac';
+    final path = '${dir.path}/flutter_sound_record_${DateTime.now().millisecondsSinceEpoch}.aac';
 
-    await _audioRecorder;
+    await _audioRecorder?.startRecorder(toFile: path);
+  }
+
+  Future<void> stopRecording() async {
+    if (!_isRecorderInitialized) return;
+
+    await _audioRecorder?.stopRecorder();
+  }
+}
+
+class Page1 extends StatelessWidget {
+  final String username;
+  final AppointmentDataSource dataSource; // 추가된 부분
+
+  Page1({required this.username, required this.dataSource}); // 수정된 부분
+
+  @override
+  Widget build(BuildContext context) {
+    return MonthScreen(username: username, dataSource: dataSource); // 수정된 부분
+  }
+}
+
+class Page2 extends StatelessWidget {
+  final String username;
+  final AppointmentDataSource dataSource; // 추가된 부분
+
+  Page2({required this.username, required this.dataSource}); // 수정된 부분
+
+  @override
+  Widget build(BuildContext context) {
+    return WeekScreen(username: username, dataSource: dataSource); // 수정된 부분
+  }
+}
+
+class Page3 extends StatelessWidget {
+  final String username;
+
+  Page3({required this.username});
+
+  @override
+  Widget build(BuildContext context) {
+    return GroupCalendar(username: username);
   }
 }
