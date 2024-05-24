@@ -148,12 +148,12 @@ class MyHomePageState extends State<MyHomePage> {
             label: 'Month',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_view_week),
-            label: 'Week',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.all_inclusive),
             label: 'TimeMatching',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_view_week),
+            label: 'Week',
           ),
         ],
         currentIndex: _selectedIndex,
