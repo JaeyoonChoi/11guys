@@ -203,6 +203,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
   }
 
   void _deleteGroup(String groupName) {
+    // todo
+    // '정말 삭제하시겠습니까?' -> yes/or 선택 추가
     setState(() {
       groups.removeWhere((group) => group['name'] == groupName);
     });
