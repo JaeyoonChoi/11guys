@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'dart:math';     // 핀 번호 랜덤 생성 위해
 
 void main() => runApp(GroupCalendar(username: '사용자명'));
 
@@ -40,7 +41,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     dataRowHeight: 64.0,
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16))), // 인원 수 열  (그룹명만 넣기 허전해서 일단 만들어 놓음)
+                      // DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16))), // 인원 수 열  (그룹명만 넣기 허전해서 일단 만들어 놓음)
+                      DataColumn(label: Text('PIN번호', style: TextStyle(fontSize: 16))), // PIN 열
                       DataColumn(label: Text('인원 추가', style: TextStyle(fontSize: 16))), // 인원 추가 열
                       DataColumn(label: Text('그룹 삭제', style: TextStyle(fontSize: 16))), // 삭제 열 추가
                     ],
@@ -48,7 +50,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                       return DataRow(
                         cells: <DataCell>[
                           DataCell(Text(group['name'], style: TextStyle(fontSize: 14))),
-                          DataCell(Text(group['count'], style: TextStyle(fontSize: 14))),
+                          DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
                           DataCell(IconButton(
                             icon: Icon(Icons.add),
                             onPressed: () {
@@ -58,7 +60,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                           DataCell(IconButton( // 삭제 버튼 추가
                             icon: Icon(Icons.delete),
                             onPressed: () {
-                              _deleteGroup(group['name']);
+                              _deleteGroup(group['pin']);
                             },
                           )),
                         ],
@@ -135,6 +137,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                   groups.add({
                     "name": groupNameController.text,
                     "count": memberCountController.text,
+                    "pin" : generateRandomPin(4),   // pin 생성
                     "members": [] // 멤버 ID를 저장하기 위한 리스트 추가
                   });
                 });
@@ -204,4 +207,19 @@ class _GroupCalendarState extends State<GroupCalendar> {
       groups.removeWhere((group) => group['name'] == groupName);
     });
   }
+}
+
+
+
+// pin 번호 랜덤 생성
+String generateRandomPin(int length) {
+  final random = Random();
+  String pin = '';
+
+  for (int i = 0; i < length; i++) {
+    // 0부터 9까지의 숫자를 랜덤으로 선택하여 PIN에 추가
+    pin += random.nextInt(10).toString();
+  }
+
+  return pin;
 }
