@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
     });
 
     return MaterialApp(
-      theme: ThemeData(primaryColor: Colors.green,),  // 테마 색상 변경
       home: MyHomePage(username: username),
     );
   }
@@ -51,8 +50,8 @@ class MyHomePageState extends State<MyHomePage> {
     _dataSource = getCalendarDataSource(_appointments); // 추가된 부분
     _pages = [
       Page1(username: widget.username, dataSource: _dataSource), // 수정된 부분
-      Page3(username: widget.username), // 수정된 부분
       Page2(username: widget.username, dataSource: _dataSource), // 수정된 부분
+      Page3(username: widget.username), // 수정된 부분
     ];
     _refreshAppointments();
   }
@@ -150,7 +149,7 @@ class MyHomePageState extends State<MyHomePage> {
             label: 'Month',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.all_inclusive, color: Colors.green),
+            icon: Icon(Icons.all_inclusive, color: Colors.green,),
             label: 'TimeMatching',
           ),
           BottomNavigationBarItem(
