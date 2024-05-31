@@ -12,9 +12,9 @@ class GroupDetailedPage extends StatelessWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            Text('그룹 캘린더 상세'),
+            // Text('그룹 캘린더 상세'),
             SizedBox(width: 8.0),
-            Text('            PIN 번호: $pin', style: TextStyle(fontSize: 20)),
+            Text('PIN 번호: $pin', style: TextStyle(fontSize: 20)),
           ],
         )
       ),
