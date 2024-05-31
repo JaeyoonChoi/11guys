@@ -19,6 +19,40 @@ class _GroupCalendarState extends State<GroupCalendar> {
   List<Map<String, dynamic>> groups = [];
 
   @override
+  void initState() {
+    super.initState();
+    _fetchGroups();
+  }
+
+  Future<void> _fetchGroups() async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    final response = await http.post(
+      Uri.parse(lambdaArn),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'function': 'getUserGroups',
+        'user_id': widget.username,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success']) {
+        setState(() {
+          groups = List<Map<String, dynamic>>.from(jsonResponse['groups']);
+        });
+      } else {
+        print('Failed to fetch groups');
+      }
+    } else {
+      print('Error: ${response.statusCode}');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -51,7 +85,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                         cells: <DataCell>[
                           DataCell(Text(group['club_name'], style: TextStyle(fontSize: 14))),
                           DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
-                          DataCell(Text(group['user_id'], style: TextStyle(fontSize: 14))),
+                          DataCell(Text(widget.username, style: TextStyle(fontSize: 14))),
                           DataCell(IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () async {
