@@ -51,8 +51,8 @@ class MyHomePageState extends State<MyHomePage> {
     _dataSource = getCalendarDataSource(_appointments);
     _pages = [
       Page1(username: widget.username, dataSource: _dataSource),
-      Page2(username: widget.username, dataSource: _dataSource),
       Page3(username: widget.username),
+      Page2(username: widget.username, dataSource: _dataSource),
     ];
     _refreshAppointments();
   }
@@ -71,41 +71,47 @@ class MyHomePageState extends State<MyHomePage> {
       'id': widget.username,
     };
 
-    final response = await http.post(
-      Uri.parse(lambdaArn),
-      body: jsonEncode(requestBody),
-      headers: {'Content-Type': 'application/json'},
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        body: jsonEncode(requestBody),
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result['success']) {
-        List<dynamic> appointmentsJson = result['appointments'];
-        List<Appointment> newAppointments = appointmentsJson.map((json) {
-          return Appointment(
-            startTime: parseCustomDateTime(json['start']),
-            endTime: parseCustomDateTime(json['end']),
-            subject: json['subject'],
-            color: _getRandomColor(), // 랜덤 색상 설정
-            startTimeZone: '',
-            endTimeZone: '',
-          );
-        }).toList();
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        print('Lambda response: $result'); // 응답 로그 추가
+        if (result['success'] == true) {
+          List<dynamic> appointmentsJson = result['appointments'];
+          List<Appointment> newAppointments = appointmentsJson.map((json) {
+            return Appointment(
+              startTime: parseCustomDateTime(json['start']),
+              endTime: parseCustomDateTime(json['end']),
+              subject: json['subject'],
+              color: _getRandomColor(), // 랜덤 색상 설정
+              startTimeZone: '',
+              endTimeZone: '',
+            );
+          }).toList();
 
-        setState(() {
-          _appointments = newAppointments;
-          _dataSource = getCalendarDataSource(_appointments);
-          _pages = [
-            Page1(username: widget.username, dataSource: _dataSource),
-            Page3(username: widget.username),
-            Page2(username: widget.username, dataSource: _dataSource),
-          ];
-        });
+          setState(() {
+            _appointments = newAppointments;
+            _dataSource = getCalendarDataSource(_appointments);
+            _pages = [
+              Page1(username: widget.username, dataSource: _dataSource),
+              Page3(username: widget.username),
+              Page2(username: widget.username, dataSource: _dataSource),
+            ];
+          });
+        } else {
+          print('Failed to fetch appointments');
+        }
       } else {
-        print('Failed to fetch appointments');
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
-    } else {
-      print('Error: ${response.statusCode}');
+    } catch (e) {
+      print('Exception: $e');
     }
   }
 
@@ -326,22 +332,28 @@ class MyHomePageState extends State<MyHomePage> {
       'color': 'blue',
     };
 
-    final response = await http.post(
-      Uri.parse(lambdaArn),
-      body: jsonEncode(requestBody),
-      headers: {'Content-Type': 'application/json'},
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        body: jsonEncode(requestBody),
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result['success']) {
-        print('Insert successful');
-        _refreshAppointments(); // 새로 추가된 일정도 새로고침
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        print('Lambda response: $result'); // 응답 로그 추가
+        if (result['success'] == true) {
+          print('Insert successful');
+          _refreshAppointments(); // 새로 추가된 일정도 새로고침
+        } else {
+          print('Insert failed');
+        }
       } else {
-        print('Insert failed');
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
-    } else {
-      print('Error: ${response.statusCode}');
+    } catch (e) {
+      print('Exception: $e');
     }
   }
 }
