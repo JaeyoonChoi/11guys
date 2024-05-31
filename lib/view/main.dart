@@ -9,7 +9,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:calendar_final/provider/appointment_control.dart'; // 추가된 부분
+import 'package:calendar_final/provider/appointment_control.dart';
+import 'dart:math'; // 추가된 부분
 
 class MyApp extends StatelessWidget {
   final String username;
@@ -42,16 +43,16 @@ class MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   List<Appointment> _appointments = [];
   late List<Widget> _pages;
-  late AppointmentDataSource _dataSource; // 추가된 부분
+  late AppointmentDataSource _dataSource;
 
   @override
   void initState() {
     super.initState();
-    _dataSource = getCalendarDataSource(_appointments); // 추가된 부분
+    _dataSource = getCalendarDataSource(_appointments);
     _pages = [
-      Page1(username: widget.username, dataSource: _dataSource), // 수정된 부분
-      Page2(username: widget.username, dataSource: _dataSource), // 수정된 부분
-      Page3(username: widget.username), // 수정된 부분
+      Page1(username: widget.username, dataSource: _dataSource),
+      Page2(username: widget.username, dataSource: _dataSource),
+      Page3(username: widget.username),
     ];
     _refreshAppointments();
   }
@@ -82,10 +83,10 @@ class MyHomePageState extends State<MyHomePage> {
         List<dynamic> appointmentsJson = result['appointments'];
         List<Appointment> newAppointments = appointmentsJson.map((json) {
           return Appointment(
-            startTime: parseCustomDateTime(json['start']), // 커스텀 파서 사용
-            endTime: parseCustomDateTime(json['end']), // 커스텀 파서 사용
+            startTime: parseCustomDateTime(json['start']),
+            endTime: parseCustomDateTime(json['end']),
             subject: json['subject'],
-            color: Colors.blue, // 색상은 json에서 가져오도록 수정 가능
+            color: _getRandomColor(), // 랜덤 색상 설정
             startTimeZone: '',
             endTimeZone: '',
           );
@@ -93,12 +94,11 @@ class MyHomePageState extends State<MyHomePage> {
 
         setState(() {
           _appointments = newAppointments;
-          _dataSource = getCalendarDataSource(_appointments); // 데이터 소스 갱신
+          _dataSource = getCalendarDataSource(_appointments);
           _pages = [
-            Page1(username: widget.username, dataSource: _dataSource), // 수정된 부분
-            Page3(username: widget.username), // 수정된 부분
-            Page2(username: widget.username, dataSource: _dataSource), // 수정된 부분
-
+            Page1(username: widget.username, dataSource: _dataSource),
+            Page3(username: widget.username),
+            Page2(username: widget.username, dataSource: _dataSource),
           ];
         });
       } else {
@@ -109,9 +109,18 @@ class MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Color _getRandomColor() {
+    final random = Random();
+    return Color.fromARGB(
+      255,
+      random.nextInt(256),
+      random.nextInt(256),
+      random.nextInt(256),
+    );
+  }
+
   DateTime parseCustomDateTime(String dateTimeString) {
     try {
-      // 예: 202405240113 -> 2024-05-24 01:13
       int year = int.parse(dateTimeString.substring(0, 4));
       int month = int.parse(dateTimeString.substring(4, 6));
       int day = int.parse(dateTimeString.substring(6, 8));
@@ -342,10 +351,8 @@ Future<void> requestMicrophonePermission() async {
   var status = await Permission.microphone.status;
   if (!status.isGranted) {
     status = await Permission.microphone.request();
-
-    }
   }
-
+}
 
 // 음성녹음
 class SoundRecorder {
@@ -384,25 +391,25 @@ class SoundRecorder {
 
 class Page1 extends StatelessWidget {
   final String username;
-  final AppointmentDataSource dataSource; // 추가된 부분
+  final AppointmentDataSource dataSource;
 
-  Page1({required this.username, required this.dataSource}); // 수정된 부분
+  Page1({required this.username, required this.dataSource});
 
   @override
   Widget build(BuildContext context) {
-    return MonthScreen(username: username, dataSource: dataSource); // 수정된 부분
+    return MonthScreen(username: username, dataSource: dataSource);
   }
 }
 
 class Page2 extends StatelessWidget {
   final String username;
-  final AppointmentDataSource dataSource; // 추가된 부분
+  final AppointmentDataSource dataSource;
 
-  Page2({required this.username, required this.dataSource}); // 수정된 부분
+  Page2({required this.username, required this.dataSource});
 
   @override
   Widget build(BuildContext context) {
-    return WeekScreen(username: username, dataSource: dataSource); // 수정된 부분
+    return WeekScreen(username: username, dataSource: dataSource);
   }
 }
 
