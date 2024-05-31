@@ -3,6 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'group_detail_page.dart';
 
 void main() => runApp(GroupCalendar(username: '사용자명'));
 
@@ -83,7 +84,19 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
                         cells: <DataCell>[
-                          DataCell(Text(group['club_name'], style: TextStyle(fontSize: 14))),
+                          DataCell(
+                            Text(group['club_name'], style: TextStyle(fontSize: 14)),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GroupDetailedPage(
+                                    pin: group['pin'],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                           DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
                           DataCell(Text(group['members_count'].toString(), style: TextStyle(fontSize: 14))), // 인원 수 표시
                           DataCell(IconButton(
@@ -228,14 +241,10 @@ class _GroupCalendarState extends State<GroupCalendar> {
             ),
             TextButton(
               child: Text('확인'),
-              onPressed: () async {
+              onPressed: () {
                 String pin = pinController.text;
 
-                // RDS로 데이터 전송
-                bool success = await _joinGroup(pin);
-                if (success) {
-                  _fetchGroups(); // 그룹 목록 갱신
-                }
+                // 여기에 PIN을 통해 그룹에 참가하는 로직 추가
                 Navigator.of(context).pop();
               },
             ),
@@ -258,33 +267,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
           'club_name': groupName,
           'pin': pin,
           'user_id': userId,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-        return jsonResponse['success'];
-      } else {
-        return false;
-      }
-    } catch (e) {
-      print(e);
-      return false;
-    }
-  }
-
-  Future<bool> _joinGroup(String pin) async {
-    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
-    try {
-      final response = await http.post(
-        Uri.parse(lambdaArn),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'function': 'joinGroup',
-          'pin': pin,
-          'user_id': widget.username,
         }),
       );
 
