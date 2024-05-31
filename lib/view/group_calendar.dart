@@ -77,7 +77,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
                       DataColumn(label: Text('PIN번호', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('학번', style: TextStyle(fontSize: 16))),
+                      DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))), // 인원 수 열 추가
                       DataColumn(label: Text('삭제', style: TextStyle(fontSize: 16))),
                     ],
                     rows: groups.map<DataRow>((group) {
@@ -85,7 +85,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                         cells: <DataCell>[
                           DataCell(Text(group['club_name'], style: TextStyle(fontSize: 14))),
                           DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
-                          DataCell(Text(widget.username, style: TextStyle(fontSize: 14))),
+                          DataCell(Text(group['members_count'].toString(), style: TextStyle(fontSize: 14))), // 인원 수 표시
                           DataCell(IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () async {
@@ -120,13 +120,23 @@ class _GroupCalendarState extends State<GroupCalendar> {
       children: [
         SpeedDialChild(
             child: const Icon(Icons.group, color: Colors.white),
-            label: "그룹 캘린더",
+            label: "새 그룹 캘린더",
             labelStyle: const TextStyle(
                 color: Colors.white, fontSize: 13.0, fontFamily: 'HancomMalangMalang', fontWeight: FontWeight.w100),
             backgroundColor: Colors.green,
             labelBackgroundColor: Colors.green,
             onTap: () {
               _showCreateGroupDialog(context);
+            }),
+        SpeedDialChild(
+            child: const Icon(Icons.group_add, color: Colors.white),
+            label: "그룹 캘린더 참가",
+            labelStyle: const TextStyle(
+                color: Colors.white, fontSize: 13.0, fontFamily: 'HancomMalangMalang', fontWeight: FontWeight.w100),
+            backgroundColor: Colors.blue,
+            labelBackgroundColor: Colors.blue,
+            onTap: () {
+              _showJoinGroupDialog(context);
             }),
       ],
     );
@@ -140,7 +150,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('그룹 캘린더'),
+          title: Text('새 그룹 캘린더'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -178,8 +188,53 @@ class _GroupCalendarState extends State<GroupCalendar> {
                       "club_name": groupName,
                       "pin": pin,
                       "user_id": memberId,
+                      "members_count": 1, // 인원 수 추가
                     });
                   });
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showJoinGroupDialog(BuildContext context) {
+    TextEditingController pinController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('그룹 캘린더 참가'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: pinController,
+                  decoration: InputDecoration(hintText: "PIN번호"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('확인'),
+              onPressed: () async {
+                String pin = pinController.text;
+
+                // RDS로 데이터 전송
+                bool success = await _joinGroup(pin);
+                if (success) {
+                  _fetchGroups(); // 그룹 목록 갱신
                 }
                 Navigator.of(context).pop();
               },
@@ -203,6 +258,33 @@ class _GroupCalendarState extends State<GroupCalendar> {
           'club_name': groupName,
           'pin': pin,
           'user_id': userId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        return jsonResponse['success'];
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> _joinGroup(String pin) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'joinGroup',
+          'pin': pin,
+          'user_id': widget.username,
         }),
       );
 
