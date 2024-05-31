@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'dart:math';     // 핀 번호 랜덤 생성 위해
+import 'dart:math';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(GroupCalendar(username: '사용자명'));
 
@@ -14,8 +16,7 @@ class GroupCalendar extends StatefulWidget {
 }
 
 class _GroupCalendarState extends State<GroupCalendar> {
-  List<Map<String, dynamic>> groups = []; // 여러 데이터 타입을 저장하기 위해 dynamic 사용
-  //여기에 그룹명, 인원 수, 학번 입력한 리스트가 저장되어있음
+  List<Map<String, dynamic>> groups = [];
 
   @override
   Widget build(BuildContext context) {
@@ -41,26 +42,25 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     dataRowHeight: 64.0,
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
-                      // DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16))), // 인원 수 열  (그룹명만 넣기 허전해서 일단 만들어 놓음)
-                      DataColumn(label: Text('PIN번호', style: TextStyle(fontSize: 16))), // PIN 열
-                      DataColumn(label: Text('인원 추가', style: TextStyle(fontSize: 16))), // 인원 추가 열
-                      DataColumn(label: Text('그룹 삭제', style: TextStyle(fontSize: 16))), // 삭제 열 추가
+                      DataColumn(label: Text('PIN번호', style: TextStyle(fontSize: 16))),
+                      DataColumn(label: Text('학번', style: TextStyle(fontSize: 16))),
+                      DataColumn(label: Text('삭제', style: TextStyle(fontSize: 16))),
                     ],
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
                         cells: <DataCell>[
-                          DataCell(Text(group['name'], style: TextStyle(fontSize: 14))),
+                          DataCell(Text(group['club_name'], style: TextStyle(fontSize: 14))),
                           DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
+                          DataCell(Text(group['user_id'], style: TextStyle(fontSize: 14))),
                           DataCell(IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              _showAddMemberDialog(group['name']);
-                            },
-                          )),
-                          DataCell(IconButton( // 삭제 버튼 추가
                             icon: Icon(Icons.delete),
-                            onPressed: () {
-                              _deleteGroup(group['pin']);
+                            onPressed: () async {
+                              bool success = await _deleteGroup(group['pin']);
+                              if (success) {
+                                setState(() {
+                                  groups.remove(group);
+                                });
+                              }
                             },
                           )),
                         ],
@@ -76,7 +76,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
       ),
     );
   }
-
 
   Widget floatingButtons(BuildContext context) {
     return SpeedDial(
@@ -101,7 +100,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
 
   void _showCreateGroupDialog(BuildContext context) {
     TextEditingController groupNameController = TextEditingController();
-    TextEditingController memberCountController = TextEditingController();
+    TextEditingController memberIdController = TextEditingController();
 
     showDialog(
       context: context,
@@ -116,8 +115,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
                   decoration: InputDecoration(hintText: "그룹명"),
                 ),
                 TextField(
-                  controller: memberCountController,
-                  decoration: InputDecoration(hintText: "인원 수"),
+                  controller: memberIdController,
+                  decoration: InputDecoration(hintText: "학번"),
                   keyboardType: TextInputType.number,
                 ),
               ],
@@ -132,15 +131,22 @@ class _GroupCalendarState extends State<GroupCalendar> {
             ),
             TextButton(
               child: Text('확인'),
-              onPressed: () {
-                setState(() {
-                  groups.add({
-                    "name": groupNameController.text,
-                    "count": memberCountController.text,
-                    "pin" : generateRandomPin(4),   // pin 생성
-                    "members": [] // 멤버 ID를 저장하기 위한 리스트 추가
+              onPressed: () async {
+                String groupName = groupNameController.text;
+                String memberId = memberIdController.text;
+                String pin = generateRandomPin(4);
+
+                // RDS로 데이터 전송
+                bool success = await _sendGroupData(groupName, pin, memberId);
+                if (success) {
+                  setState(() {
+                    groups.add({
+                      "club_name": groupName,
+                      "pin": pin,
+                      "user_id": memberId,
+                    });
                   });
-                });
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -150,78 +156,68 @@ class _GroupCalendarState extends State<GroupCalendar> {
     );
   }
 
-  void _showAddMemberDialog(String groupName) {
-    List<TextEditingController> controllers = [TextEditingController()];
+  Future<bool> _sendGroupData(String groupName, String pin, String userId) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'insertGroup',
+          'club_name': groupName,
+          'pin': pin,
+          'user_id': userId,
+        }),
+      );
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('인원 추가'),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    for (var controller in controllers)
-                      TextField(
-                        controller: controller,
-                        decoration: InputDecoration(hintText: "학번"),
-                        keyboardType: TextInputType.number,
-                      ),
-                    TextButton(
-                      child: Text('인원 추가'),
-                      onPressed: () {
-                        setState(() {
-                          controllers.add(TextEditingController());
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('취소'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text('확인'),
-                  onPressed: () {
-                    // 여기에 학번 추가 로직을 구현하세요.
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        return jsonResponse['success'];
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
-  void _deleteGroup(String groupName) {
-    // todo
-    // '정말 삭제하시겠습니까?' -> yes/or 선택 추가
-    setState(() {
-      groups.removeWhere((group) => group['name'] == groupName);
-    });
+  Future<bool> _deleteGroup(String pin) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'deleteGroup',
+          'pin': pin,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        return jsonResponse['success'];
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
-}
 
+  String generateRandomPin(int length) {
+    final random = Random();
+    String pin = '';
 
+    for (int i = 0; i < length; i++) {
+      pin += random.nextInt(10).toString();
+    }
 
-// pin 번호 랜덤 생성
-String generateRandomPin(int length) {
-  final random = Random();
-  String pin = '';
-
-  for (int i = 0; i < length; i++) {
-    // 0부터 9까지의 숫자를 랜덤으로 선택하여 PIN에 추가
-    pin += random.nextInt(10).toString();
+    return pin;
   }
-
-  return pin;
 }
