@@ -250,7 +250,14 @@ class _GroupCalendarState extends State<GroupCalendar> {
                 // RDS로 데이터 전송
                 bool success = await _sendGroupData(groupName, pin, widget.username);
                 if (success) {
-                  _fetchGroups();
+                  setState(() {
+                    groups.add({
+                      "club_name": groupName,
+                      "pin": pin,
+                      "user_id": widget.username,
+                      "members_count": 1, // 인원 수 추가
+                    });
+                  });
                 }
                 Navigator.of(context).pop();
               },
