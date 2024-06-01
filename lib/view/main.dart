@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      requestMicrophonePermission();
+      requestMicrophonePermission();  // 마이크 권한 요청
     });
 
     return MaterialApp(
@@ -48,18 +48,18 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _dataSource = getCalendarDataSource(_appointments);
+    _dataSource = getCalendarDataSource(_appointments);  // 일정 데이터를 위한 데이터 소스 생성
     _pages = [
-      Page1(username: widget.username, dataSource: _dataSource),
-      Page3(username: widget.username),
-      Page2(username: widget.username, dataSource: _dataSource),
+      Page1(username: widget.username, dataSource: _dataSource),  // 월간 뷰 페이지
+      Page3(username: widget.username),  // 그룹 캘린더 페이지
+      Page2(username: widget.username, dataSource: _dataSource),  // 주간 뷰 페이지
     ];
-    _refreshAppointments();
+    _refreshAppointments();  // 일정 데이터를 새로고침
   }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index;  // 선택된 네비게이션 바 인덱스 업데이트
     });
   }
 
@@ -67,7 +67,7 @@ class MyHomePageState extends State<MyHomePage> {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     Map<String, dynamic> requestBody = {
-      'function': 'getAppointments',
+      'function': 'getAppointments',  // 람다 함수의 'getAppointments' 호출
       'id': widget.username,
     };
 
@@ -75,20 +75,20 @@ class MyHomePageState extends State<MyHomePage> {
       final response = await http.post(
         Uri.parse(lambdaArn),
         body: jsonEncode(requestBody),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json'},  // JSON 형식의 헤더 설정
       );
 
       if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        print('Lambda response: $result'); // 응답 로그 추가
+        final result = jsonDecode(response.body);  // 응답 바디를 JSON으로 디코딩
+        print('Lambda response: $result');  // 디버그용 로그
         if (result['success'] == true) {
           List<dynamic> appointmentsJson = result['appointments'];
           List<Appointment> newAppointments = appointmentsJson.map((json) {
             return Appointment(
-              startTime: parseCustomDateTime(json['start']),
-              endTime: parseCustomDateTime(json['end']),
+              startTime: parseCustomDateTime(json['start']),  // 시작 시간 파싱
+              endTime: parseCustomDateTime(json['end']),  // 종료 시간 파싱
               subject: json['subject'],
-              color: _getRandomColor(), // 랜덤 색상 설정
+              color: _getRandomColor(),  // 랜덤 색상 설정
               startTimeZone: '',
               endTimeZone: '',
             );
@@ -148,40 +148,40 @@ class MyHomePageState extends State<MyHomePage> {
             Image.asset('images/magu.png', height: 150,),
             IconButton(
               icon: Icon(Icons.refresh),
-              onPressed: _refreshAppointments,
+              onPressed: _refreshAppointments,  // 새로고침 버튼 눌렀을 때 일정 새로고침
             ),
           ],
         ),
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: _pages,  // 페이지 스택
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
-            label: 'Month',
+            label: 'Month',  // 월간 뷰
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.all_inclusive, color: Colors.green,),
-            label: 'TimeMatching',
+            label: 'TimeMatching',  // 타임 매칭
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_view_week),
-            label: 'Week',
+            label: 'Week',  // 주간 뷰
           ),
         ],
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: _onItemTapped,  // 네비게이션 바 아이템 클릭 시 호출
       ),
-      floatingActionButton: _selectedIndex == 1 ? null : floatingButtons(),
+      floatingActionButton: _selectedIndex == 1 ? null : floatingButtons(),  // 플로팅 버튼
     );
   }
 
   Widget floatingButtons() {
     SoundRecorder soundRecorder = SoundRecorder();
-    soundRecorder.init();
+    soundRecorder.init();  // 음성 녹음기 초기화
 
     return SpeedDial(
       animatedIcon: AnimatedIcons.menu_close,
@@ -223,7 +223,7 @@ class MyHomePageState extends State<MyHomePage> {
           labelStyle: const TextStyle(
               fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
           onTap: () {
-            _showInsertDialog();
+            _showInsertDialog();  // 직접 입력 다이얼로그 호출
           },
         ),
       ],
@@ -247,7 +247,7 @@ class MyHomePageState extends State<MyHomePage> {
             children: [
               TextField(
                 controller: subjectController,
-                decoration: InputDecoration(labelText: '일정명'),
+                decoration: InputDecoration(labelText: '일정명'),  // 일정명 입력 필드
               ),
               TextButton(
                 onPressed: () async {
@@ -264,7 +264,7 @@ class MyHomePageState extends State<MyHomePage> {
                     );
                   }
                 },
-                child: Text('시작 날짜 및 시간 선택'),
+                child: Text('시작 날짜 및 시간 선택'),  // 시작 날짜 및 시간 선택 버튼
               ),
               TextButton(
                 onPressed: () async {
@@ -281,7 +281,7 @@ class MyHomePageState extends State<MyHomePage> {
                     );
                   }
                 },
-                child: Text('끝나는 날짜 및 시간 선택'),
+                child: Text('끝나는 날짜 및 시간 선택'),  // 끝나는 날짜 및 시간 선택 버튼
               ),
             ],
           ),
@@ -290,23 +290,23 @@ class MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('취소'),
+              child: Text('취소'),  // 취소 버튼
             ),
             ElevatedButton(
               onPressed: () {
                 if (startDate != null && startTime != null && endDate != null && endTime != null) {
                   String subject = subjectController.text;
-                  String startDateTime = formatDateTime(startDate!, startTime!);
-                  String endDateTime = formatDateTime(endDate!, endTime!);
+                  String startDateTime = formatDateTime(startDate!, startTime!);  // 시작 날짜 및 시간 포맷팅
+                  String endDateTime = formatDateTime(endDate!, endTime!);  // 끝나는 날짜 및 시간 포맷팅
 
-                  _insertSchedule(subject, startDateTime, endDateTime);
+                  _insertSchedule(subject, startDateTime, endDateTime);  // 일정 데이터 입력/전송
 
                   Navigator.of(context).pop();
                 } else {
                   // handle error
                 }
               },
-              child: Text('확인'),
+              child: Text('확인'),  // 확인 버튼
             ),
           ],
         );
@@ -320,6 +320,7 @@ class MyHomePageState extends State<MyHomePage> {
     return formattedDate + formattedTime;
   }
 
+  // 일정 데이터 입력/전송
   void _insertSchedule(String subject, String startDateTime, String endDateTime) async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
@@ -341,10 +342,10 @@ class MyHomePageState extends State<MyHomePage> {
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        print('Lambda response: $result'); // 응답 로그 추가
+        print('Lambda response: $result');  // 응답 로그 추가
         if (result['success'] == true) {
           print('Insert successful');
-          _refreshAppointments(); // 새로 추가된 일정도 새로고침
+          _refreshAppointments();  // 새로 추가된 일정도 새로고침
         } else {
           print('Insert failed');
         }
@@ -358,7 +359,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// 마이크 권한
+// 마이크 권한 요청 함수
 Future<void> requestMicrophonePermission() async {
   var status = await Permission.microphone.status;
   if (!status.isGranted) {
@@ -366,7 +367,7 @@ Future<void> requestMicrophonePermission() async {
   }
 }
 
-// 음성녹음
+// 음성 녹음 클래스
 class SoundRecorder {
   FlutterSoundRecorder? _audioRecorder;
   bool _isRecorderInitialized = false;
@@ -401,6 +402,7 @@ class SoundRecorder {
   }
 }
 
+// 페이지 클래스 정의
 class Page1 extends StatelessWidget {
   final String username;
   final AppointmentDataSource dataSource;
