@@ -324,8 +324,8 @@ class MyHomePageState extends State<MyHomePage> {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     Map<String, dynamic> requestBody = {
-      'function': 'insert',
-      'id': widget.username,
+      'function': 'addAppointment',
+      'user_id': widget.username,
       'subject': subject,
       'start': startDateTime,
       'end': endDateTime,
