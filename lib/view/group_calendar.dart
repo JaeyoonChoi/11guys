@@ -53,6 +53,60 @@ class _GroupCalendarState extends State<GroupCalendar> {
     }
   }
 
+  Future<List<String>> _fetchGroupMembers(String pin) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    final response = await http.post(
+      Uri.parse(lambdaArn),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'function': 'getGroupMembers',
+        'pin': pin,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success']) {
+        return List<String>.from(jsonResponse['members']);
+      } else {
+        print('Failed to fetch group members');
+        return [];
+      }
+    } else {
+      print('Error: ${response.statusCode}');
+      return [];
+    }
+  }
+
+  void _showGroupMembersDialog(String pin) async {
+    List<String> members = await _fetchGroupMembers(pin);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('그룹 멤버'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: members.map((member) => Text(member)).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -98,7 +152,14 @@ class _GroupCalendarState extends State<GroupCalendar> {
                             },
                           ),
                           DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
-                          DataCell(Text(group['members_count'].toString(), style: TextStyle(fontSize: 14))), // 인원 수 표시
+                          DataCell(
+                            GestureDetector(
+                              child: Text(group['members_count'].toString(), style: TextStyle(fontSize: 14)), // 인원 수 표시
+                              onTap: () {
+                                _showGroupMembersDialog(group['pin']);
+                              },
+                            ),
+                          ),
                           DataCell(IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () async {
@@ -157,7 +218,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
 
   void _showCreateGroupDialog(BuildContext context) {
     TextEditingController groupNameController = TextEditingController();
-    TextEditingController memberIdController = TextEditingController();
 
     showDialog(
       context: context,
@@ -170,11 +230,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
                 TextField(
                   controller: groupNameController,
                   decoration: InputDecoration(hintText: "그룹명"),
-                ),
-                TextField(
-                  controller: memberIdController,
-                  decoration: InputDecoration(hintText: "학번"),
-                  keyboardType: TextInputType.number,
                 ),
               ],
             ),
@@ -190,20 +245,12 @@ class _GroupCalendarState extends State<GroupCalendar> {
               child: Text('확인'),
               onPressed: () async {
                 String groupName = groupNameController.text;
-                String memberId = memberIdController.text;
                 String pin = generateRandomPin(4);
 
                 // RDS로 데이터 전송
-                bool success = await _sendGroupData(groupName, pin, memberId);
+                bool success = await _sendGroupData(groupName, pin, widget.username);
                 if (success) {
-                  setState(() {
-                    groups.add({
-                      "club_name": groupName,
-                      "pin": pin,
-                      "user_id": memberId,
-                      "members_count": 1, // 인원 수 추가
-                    });
-                  });
+                  _fetchGroups();
                 }
                 Navigator.of(context).pop();
               },
@@ -241,10 +288,15 @@ class _GroupCalendarState extends State<GroupCalendar> {
             ),
             TextButton(
               child: Text('확인'),
-              onPressed: () {
+              onPressed: () async {
                 String pin = pinController.text;
-
-                // 여기에 PIN을 통해 그룹에 참가하는 로직 추가
+                bool success = await _joinGroup(pin, widget.username);
+                if (success) {
+                  print('Successfully joined group');
+                  _fetchGroups();
+                } else {
+                  print('Failed to join group');
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -272,12 +324,43 @@ class _GroupCalendarState extends State<GroupCalendar> {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        print('Insert Group Response: $jsonResponse');
         return jsonResponse['success'];
       } else {
+        print('Insert Group Error: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      print(e);
+      print('Insert Group Exception: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _joinGroup(String pin, String userId) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'joinGroup',
+          'pin': pin,
+          'user_id': userId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        print('Join Group Response: $jsonResponse');
+        return jsonResponse['success'];
+      } else {
+        print('Join Group Error: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Join Group Exception: $e');
       return false;
     }
   }
@@ -298,12 +381,14 @@ class _GroupCalendarState extends State<GroupCalendar> {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        print('Delete Group Response: $jsonResponse');
         return jsonResponse['success'];
       } else {
+        print('Delete Group Error: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      print(e);
+      print('Delete Group Exception: $e');
       return false;
     }
   }
