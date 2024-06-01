@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
-import 'dart:math'; // 추가된 부분
+import 'dart:math';
 
 class MyApp extends StatelessWidget {
   final String username;
