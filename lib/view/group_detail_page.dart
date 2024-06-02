@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'dart:math';
 
 class GroupDetailedPage extends StatefulWidget {
   final String pin;
@@ -11,151 +14,120 @@ class GroupDetailedPage extends StatefulWidget {
 }
 
 class _GroupDetailedPageState extends State<GroupDetailedPage> {
-  // 길게 누른 영역의 날짜 정보를 저장할 변수
-  late DateTime _pressedDateTime;
-  // 길게 누른 영역의 시작 시간을 저장할 변수
-  TimeOfDay _pressedStartTime = TimeOfDay.now();
-  // 사용자가 선택한 종료 시간을 저장할 변수
-  TimeOfDay? _pressedEndTime;
+  late Future<List<Map<String, dynamic>>> overlappingIntervals;
+  List<Appointment> _appointments = [];
+  late AppointmentDataSource _dataSource;
+
+  @override
+  void initState() {
+    super.initState();
+    overlappingIntervals = fetchOverlappingIntervals();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchOverlappingIntervals() async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    final response = await http.post(
+      Uri.parse(lambdaArn),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'function': 'findOverlappingIntervals',
+        'pin': widget.pin,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success']) {
+        List<Map<String, dynamic>> intervals = List<Map<String, dynamic>>.from(jsonResponse['overlapping_intervals'].map((interval) => {
+          'start': DateTime.parse(interval[0]), // 수정된 부분
+          'end': DateTime.parse(interval[1]), // 수정된 부분
+          'count': interval[2],
+        }));
+
+        _appointments = intervals.map((interval) {
+          return Appointment(
+            startTime: interval['start'],
+            endTime: interval['end'],
+            subject: '${interval['count']} members',
+            color: _getRandomColor(),
+          );
+        }).toList();
+
+        _dataSource = AppointmentDataSource(_appointments);
+        return intervals;
+      } else {
+        throw Exception('Failed to load overlapping intervals');
+      }
+    } else {
+      throw Exception('Failed to fetch data');
+    }
+  }
+
+  Color _getRandomColor() {
+    final random = Random();
+    return Color.fromARGB(
+      255,
+      random.nextInt(256),
+      random.nextInt(256),
+      random.nextInt(256),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text('그룹 캘린더 상세'),
-            SizedBox(width: 8.0),
-            Text('PIN 번호: ${widget.pin}', style: TextStyle(fontSize: 20)),
-          ],
-        ),
+        title: Text('Group Details'),
       ),
-      body: Container(
-        child: SfCalendar(
-          view: CalendarView.week,
-          // 캘린더 영역을 길게 누르면 실행되는 콜백 함수
-          onLongPress: (CalendarLongPressDetails details) {
-            // 길게 누른 영역의 날짜 정보를 저장
-            _pressedDateTime = details.date!;
-            // 길게 누른 영역의 시작 시간을 설정
-            _pressedStartTime = TimeOfDay.fromDateTime(_pressedDateTime);
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: overlappingIntervals,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No overlapping intervals found.'));
+          }
 
-            // 상태를 업데이트하여 UI 갱신
-            setState(() {});
+          List<Map<String, dynamic>> intervals = snapshot.data!;
 
-            // 새 일정 추가 다이얼로그 표시
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                // 일정 제목을 입력받을 텍스트 필드 컨트롤러
-                final TextEditingController titleController = TextEditingController();
-
-                return AlertDialog(
-                  title: Text('새 일정 추가'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 일정 제목 입력 필드
-                      TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          hintText: '일정 제목 입력',
-                        ),
-                      ),
-                      SizedBox(height: 16.0),
-                      // 선택된 날짜 표시
-                      Text('선택된 날짜: ${_pressedDateTime.year}년 ${_pressedDateTime.month}월 ${_pressedDateTime.day}일'),
-                      SizedBox(height: 8.0),
-                      // 시작 시간 선택 버튼
-                      Row(
-                        children: [
-                          Text('시작 시간: '),
-                          TextButton(
-                            onPressed: () async {
-                              // 시작 시간 선택 다이얼로그 표시
-                              final TimeOfDay? picked = await showTimePicker(
-                                context: context,
-                                initialTime: _pressedStartTime,
-                              );
-                              if (picked != null) {
-                                // 선택된 시작 시간 저장
-                                setState(() {
-                                  _pressedStartTime = picked;
-                                });
-                              }
-                            },
-                            child: Text('${_pressedStartTime.hour}:${_pressedStartTime.minute.toString().padLeft(2, '0')}'),
-                          ),
-                        ],
-                      ),
-                      // 종료 시간 선택 버튼
-                      Row(
-                        children: [
-                          Text('종료 시간: '),
-                          TextButton(
-                            onPressed: () async {
-                              // 종료 시간 선택 다이얼로그 표시
-                              _pressedEndTime = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay(hour: _pressedStartTime.hour + 1, minute: _pressedStartTime.minute),
-                              );
-                              // 선택된 종료 시간 저장
-                              setState(() {});
-                            },
-                            child: _pressedEndTime != null
-                                ? Text('${_pressedEndTime!.hour}:${_pressedEndTime!.minute.toString().padLeft(2, '0')}')
-                                : Text('선택'),
-                          ),
-                        ],
-                      ),
-                    ],
+          return Column(
+            children: [
+              Expanded(
+                child: SfCalendar(
+                  view: CalendarView.week,
+                  dataSource: _dataSource,
+                  timeSlotViewSettings: TimeSlotViewSettings(
+                    timeInterval: Duration(minutes: 30),
                   ),
-                  actions: [
-                    // 취소 버튼
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('취소'),
-                    ),
-                    // 저장 버튼
-                    TextButton(
-                      onPressed: () {
-                        // 일정 제목 가져오기
-                        final String title = titleController.text;
-                        // 시작 시간 계산
-                        final DateTime startDateTime = DateTime(
-                          _pressedDateTime.year,
-                          _pressedDateTime.month,
-                          _pressedDateTime.day,
-                          _pressedStartTime.hour,
-                          _pressedStartTime.minute,
-                        );
-                        // 종료 시간 계산
-                        final DateTime endDateTime = _pressedEndTime != null
-                            ? DateTime(
-                          _pressedDateTime.year,
-                          _pressedDateTime.month,
-                          _pressedDateTime.day,
-                          _pressedEndTime!.hour,
-                          _pressedEndTime!.minute,
-                        )
-                            : startDateTime.add(Duration(hours: 1));
-
-                        // 새 일정 정보 출력
-                        print('새 일정 추가: $title, $startDateTime - $endDateTime');
-                        // 다이얼로그 닫기
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('저장'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: intervals.length,
+                  itemBuilder: (context, index) {
+                    var interval = intervals[index];
+                    return ListTile(
+                      title: Text('${interval['start']} - ${interval['end']}'),
+                      subtitle: Text('${interval['count']} members'),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+}
+
+class AppointmentDataSource extends CalendarDataSource {
+  AppointmentDataSource(List<Appointment> source) {
+    appointments = source;
   }
 }
