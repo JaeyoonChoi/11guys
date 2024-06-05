@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
+import 'package:calendar_final/view/main.dart';
+import 'main.dart';
+
 
 class WeekScreen extends StatelessWidget {
   final String username;
-  final AppointmentDataSource dataSource; // 추가된 부분
+  final AppointmentDataSource dataSource;
 
-  WeekScreen({required this.username, required this.dataSource}); // 수정된 부분
+  WeekScreen({required this.username, required this.dataSource});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,7 @@ class WeekScreen extends StatelessWidget {
         child: SfCalendar(
           view: CalendarView.week,
           showNavigationArrow: true,
-          dataSource: dataSource, // 수정된 부분
+          dataSource: dataSource,
           allowDragAndDrop: true,
           onDragStart: dragStart,
           onDragUpdate: dragUpdate,
@@ -28,49 +31,157 @@ class WeekScreen extends StatelessWidget {
             timeIntervalHeight: -1,
             minimumAppointmentDuration: Duration(minutes: 10),
           ),
+          // 셀을 길게 눌렀을 때 호출되는 콜백
+          onLongPress: (details) {
+            // 선택된 셀의 상세 정보 받기
+            if (details.targetElement == CalendarElement.calendarCell && details.date != null) {
+              // 선택된 셀의 시작, 끝 시간 계산 (기본 1시간 설정)
+              DateTime selectedDate = details.date!;
+              DateTime endDate = selectedDate.add(Duration(hours: 1));
+              // 일정 추가 다이얼로그 표시
+              showInsertDialog(context, selectedDate, endDate);
+            }
+          }
         ),
       ),
     );
   }
 }
 
-// Drag & Drop
-void dragStart(AppointmentDragStartDetails appointmentDragStartDetails) {
-  dynamic appointment = appointmentDragStartDetails.appointment;
-  CalendarResource? resource = appointmentDragStartDetails.resource;
-}
-void dragUpdate(AppointmentDragUpdateDetails appointmentDragUpdateDetails) {
-  dynamic appointment = appointmentDragUpdateDetails.appointment;
-  DateTime? draggingTime = appointmentDragUpdateDetails.draggingTime;
-  Offset? draggingOffset = appointmentDragUpdateDetails.draggingPosition;
-  CalendarResource? sourceResource = appointmentDragUpdateDetails.sourceResource;
-  CalendarResource? targetResource = appointmentDragUpdateDetails.targetResource;
-}
-void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
-  dynamic appointment = appointmentDragEndDetails.appointment!;
-  CalendarResource? sourceResource = appointmentDragEndDetails.sourceResource;
-  CalendarResource? targetResource = appointmentDragEndDetails.targetResource;
-  DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
+// 일정 추가 다이얼로그 함수 : showInsertDialog()
+void showInsertDialog(BuildContext context, DateTime startTime, DateTime endTime) {
+  final TextEditingController titleController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("일정 추가"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 제목 입력 필드
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: "Title"),
+            ),
+            TextButton(
+                onPressed: () async{
+                  TimeOfDay? selectedStartTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(startTime),
+                  );
+
+                  // 시작 시간을 선택한 경우
+                  if (selectedStartTime != null) {
+                    startTime = DateTime(
+                      startTime.year,
+                      startTime.month,
+                      startTime.day,
+                      selectedStartTime.hour,
+                      selectedStartTime.minute,
+                    );
+                  }
+              // }
+            },
+                child: Text('시작 시간')),
+
+            TextButton(
+                onPressed: () async{
+                  TimeOfDay? selectedEndTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(endTime),
+                  );
+
+                  // 끝 시간을 선택한 경우
+                  if (selectedEndTime != null) {
+                    endTime = DateTime(
+                      endTime.year,
+                      endTime.month,
+                      endTime.day,
+                      selectedEndTime.hour,
+                      selectedEndTime.minute,
+                    );
+                  }
+                },
+                child: Text("끝 시간")
+            ),
+
+            // gpt 제안
+            // SizedBox(height: 20),
+            // // 선택한 셀의 시작 시간을 표시합니다.
+            // Row(
+            //   children: [
+            //     Text("Start: ${startTime.toString()}"),
+            //   ],
+            // ),
+            // SizedBox(height: 10),
+            // // 선택한 셀의 끝 시간을 표시합니다.
+            // Row(
+            //   children: [
+            //     Text("End: ${endTime.toString()}"),
+            //   ],
+            // ),
+          ],
+        ),
+        actions: [
+          // 저장 버튼
+          TextButton(
+            onPressed: () {
+              // 여기서 데이터를 dataSource에 추가하는 로직을 구현할 수 있습니다.
+              Navigator.of(context).pop();
+            },
+            child: Text("Save"),
+          ),
+          // 취소 버튼
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 
-
-
-// onAppointmentResizeStart
-void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
-  dynamic appointment = appointmentResizeStartDetails.appointment;
-  CalendarResource? resource = appointmentResizeStartDetails.resource;
-}
-void resizeUpdate(AppointmentResizeUpdateDetails appointmentResizeUpdateDetails) {
-  dynamic appointment = appointmentResizeUpdateDetails.appointment;
-  DateTime? resizingTime = appointmentResizeUpdateDetails.resizingTime;
-  Offset? resizingOffset = appointmentResizeUpdateDetails.resizingOffset;
-  CalendarResource? resourceDetails = appointmentResizeUpdateDetails.resource;
-}
-void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
-  dynamic appointment = appointmentResizeEndDetails.appointment;
-  DateTime? startTime = appointmentResizeEndDetails.startTime;
-  DateTime? endTime = appointmentResizeEndDetails.endTime;
-  CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
-}
+// // Drag & Drop
+// void dragStart(AppointmentDragStartDetails appointmentDragStartDetails) {
+//   dynamic appointment = appointmentDragStartDetails.appointment;
+//   CalendarResource? resource = appointmentDragStartDetails.resource;
+// }
+// void dragUpdate(AppointmentDragUpdateDetails appointmentDragUpdateDetails) {
+//   dynamic appointment = appointmentDragUpdateDetails.appointment;
+//   DateTime? draggingTime = appointmentDragUpdateDetails.draggingTime;
+//   Offset? draggingOffset = appointmentDragUpdateDetails.draggingPosition;
+//   CalendarResource? sourceResource = appointmentDragUpdateDetails.sourceResource;
+//   CalendarResource? targetResource = appointmentDragUpdateDetails.targetResource;
+// }
+// void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
+//   dynamic appointment = appointmentDragEndDetails.appointment!;
+//   CalendarResource? sourceResource = appointmentDragEndDetails.sourceResource;
+//   CalendarResource? targetResource = appointmentDragEndDetails.targetResource;
+//   DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
+// }
+//
+//
+// // onAppointmentResizeStart
+// void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
+//   dynamic appointment = appointmentResizeStartDetails.appointment;
+//   CalendarResource? resource = appointmentResizeStartDetails.resource;
+// }
+// void resizeUpdate(AppointmentResizeUpdateDetails appointmentResizeUpdateDetails) {
+//   dynamic appointment = appointmentResizeUpdateDetails.appointment;
+//   DateTime? resizingTime = appointmentResizeUpdateDetails.resizingTime;
+//   Offset? resizingOffset = appointmentResizeUpdateDetails.resizingOffset;
+//   CalendarResource? resourceDetails = appointmentResizeUpdateDetails.resource;
+// }
+// void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
+//   dynamic appointment = appointmentResizeEndDetails.appointment;
+//   DateTime? startTime = appointmentResizeEndDetails.startTime;
+//   DateTime? endTime = appointmentResizeEndDetails.endTime;
+//   CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
+// }
 

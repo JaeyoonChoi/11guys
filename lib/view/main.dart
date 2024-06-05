@@ -223,14 +223,14 @@ class MyHomePageState extends State<MyHomePage> {
           labelStyle: const TextStyle(
               fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
           onTap: () {
-            _showInsertDialog();  // 직접 입력 다이얼로그 호출
+            showInsertDialog();  // 직접 입력 다이얼로그 호출
           },
         ),
       ],
     );
   }
 
-  void _showInsertDialog() {
+  void showInsertDialog() {
     final TextEditingController subjectController = TextEditingController();
     DateTime? startDate;
     TimeOfDay? startTime;
@@ -264,7 +264,7 @@ class MyHomePageState extends State<MyHomePage> {
                     );
                   }
                 },
-                child: Text('시작 날짜 및 시간 선택'),  // 시작 날짜 및 시간 선택 버튼
+                child: Text('시작 날짜&시간 선택'),  // 시작 날짜 및 시간 선택 버튼
               ),
               TextButton(
                 onPressed: () async {
@@ -281,7 +281,7 @@ class MyHomePageState extends State<MyHomePage> {
                     );
                   }
                 },
-                child: Text('끝나는 날짜 및 시간 선택'),  // 끝나는 날짜 및 시간 선택 버튼
+                child: Text('끝 날짜&시간 선택'),  // 끝나는 날짜 및 시간 선택 버튼
               ),
             ],
           ),

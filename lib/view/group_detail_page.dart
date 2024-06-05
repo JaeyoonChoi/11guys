@@ -6,7 +6,6 @@ import 'dart:math';
 
 class GroupDetailedPage extends StatefulWidget {
   final String pin;
-
   GroupDetailedPage({required this.pin});
 
   @override
@@ -14,6 +13,7 @@ class GroupDetailedPage extends StatefulWidget {
 }
 
 class _GroupDetailedPageState extends State<GroupDetailedPage> {
+  // 곂치는 시간 가져오기
   late Future<List<Map<String, dynamic>>> overlappingIntervals;
   List<Appointment> _appointments = [];
   late AppointmentDataSource _dataSource;
