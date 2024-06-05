@@ -30,8 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  syncfusion_flutter_calendar: ^25.2.5
+  speech_to_text: ^6.6.0
+  intl: ^0.19.0
+  syncfusion_flutter_calendar: ^21.2.3
   flutter_speed_dial: ^7.0.0
+
+
   # 백엔드 연결
 #  aws_s3_plugin: ^0.3.0
   path_provider: ^2.0.11
