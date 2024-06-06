@@ -46,7 +46,7 @@ class WeekScreen extends StatelessWidget {
               // 블럭을 길게 눌렀을 때
               else if (details.targetElement == CalendarElement.appointment && details.appointments != null) {
                 final dynamic appointment = details.appointments!.first;
-                showEditDialog(context, appointment);
+                showEditDialog(context, username, appointment);
               }
             }
         ),
@@ -119,9 +119,6 @@ class WeekScreen extends StatelessWidget {
                 // Lambda로 일정 데이터 전송
                 bool success = await insertSchedule(username, titleController.text, startTime, endTime);
                 if (success) {
-                  // 데이터 소스 갱신 및 새로고침 로직을 여기 추가할 수 있습니다.
-                  // 예: dataSource.notifyListeners();
-
                   Navigator.of(context).pop();
                 } else {
                   // 오류 처리 로직
@@ -147,7 +144,7 @@ class WeekScreen extends StatelessWidget {
 
     Map<String, dynamic> requestBody = {
       'function': 'insert',
-      'id': username,
+      'id': username, // username을 id로 사용
       'subject': subject,
       'start': formatDateTime(start),
       'end': formatDateTime(end),
@@ -182,7 +179,7 @@ class WeekScreen extends StatelessWidget {
   }
 
   // 일정 수정 다이얼로그 함수 : showEditDialog()
-  void showEditDialog(BuildContext context, dynamic appointment) {
+  void showEditDialog(BuildContext context, String username, dynamic appointment) {
     final TextEditingController titleController = TextEditingController(text: appointment.subject);
     DateTime startTime = appointment.startTime;
     DateTime endTime = appointment.endTime;
@@ -258,12 +255,21 @@ class WeekScreen extends StatelessWidget {
           actions: [
             // 저장 버튼
             TextButton(
-              onPressed: () {
-                // 일정 수정 로직 추가
-                appointment.subject = titleController.text;
-                appointment.startTime = startTime;
-                appointment.endTime = endTime;
-                Navigator.of(context).pop();
+              onPressed: () async {
+                // Lambda로 일정 데이터 전송
+                bool success = await editSchedule(
+                  username,
+                  appointment.startTime,
+                  appointment.endTime,
+                  titleController.text,
+                  startTime,
+                  endTime,
+                );
+                if (success) {
+                  Navigator.of(context).pop();
+                } else {
+                  // 오류 처리 로직
+                }
               },
               child: Text("Save"),
             ),
@@ -279,41 +285,87 @@ class WeekScreen extends StatelessWidget {
       },
     );
   }
-}
 
-// Drag & Drop
-void dragStart(AppointmentDragStartDetails appointmentDragStartDetails) {
-  dynamic appointment = appointmentDragStartDetails.appointment;
-  CalendarResource? resource = appointmentDragStartDetails.resource;
-}
-void dragUpdate(AppointmentDragUpdateDetails appointmentDragUpdateDetails) {
-  dynamic appointment = appointmentDragUpdateDetails.appointment;
-  DateTime? draggingTime = appointmentDragUpdateDetails.draggingTime;
-  Offset? draggingOffset = appointmentDragUpdateDetails.draggingPosition;
-  CalendarResource? sourceResource = appointmentDragUpdateDetails.sourceResource;
-  CalendarResource? targetResource = appointmentDragUpdateDetails.targetResource;
-}
-void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
-  dynamic appointment = appointmentDragEndDetails.appointment!;
-  CalendarResource? sourceResource = appointmentDragEndDetails.sourceResource;
-  CalendarResource? targetResource = appointmentDragEndDetails.targetResource;
-  DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
-}
+  Future<bool> editSchedule(
+      String username,
+      DateTime oldStart,
+      DateTime oldEnd,
+      String newSubject,
+      DateTime newStart,
+      DateTime newEnd,
+      ) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
-// onAppointmentResizeStart
-void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
-  dynamic appointment = appointmentResizeStartDetails.appointment;
-  CalendarResource? resource = appointmentResizeStartDetails.resource;
-}
-void resizeUpdate(AppointmentResizeUpdateDetails appointmentResizeUpdateDetails) {
-  dynamic appointment = appointmentResizeUpdateDetails.appointment;
-  DateTime? resizingTime = appointmentResizeUpdateDetails.resizingTime;
-  Offset? resizingOffset = appointmentResizeUpdateDetails.resizingOffset;
-  CalendarResource? resourceDetails = appointmentResizeUpdateDetails.resource;
-}
-void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
-  dynamic appointment = appointmentResizeEndDetails.appointment;
-  DateTime? startTime = appointmentResizeEndDetails.startTime;
-  DateTime? endTime = appointmentResizeEndDetails.endTime;
-  CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
+    Map<String, dynamic> requestBody = {
+      'function': 'edit',
+      'id': username, // username을 id로 사용
+      'old_start': formatDateTime(oldStart),
+      'old_end': formatDateTime(oldEnd),
+      'new_start': formatDateTime(newStart),
+      'new_end': formatDateTime(newEnd),
+      'new_subject': newSubject,
+      'new_color': 'blue', // 필요에 따라 색상 설정
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        body: jsonEncode(requestBody),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['success'] == true;
+      } else {
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return false;
+    }
+  }
+
+  // Drag & Drop
+  void dragStart(AppointmentDragStartDetails appointmentDragStartDetails) {
+    dynamic appointment = appointmentDragStartDetails.appointment;
+    CalendarResource? resource = appointmentDragStartDetails.resource;
+  }
+
+  void dragUpdate(AppointmentDragUpdateDetails appointmentDragUpdateDetails) {
+    dynamic appointment = appointmentDragUpdateDetails.appointment;
+    DateTime? draggingTime = appointmentDragUpdateDetails.draggingTime;
+    Offset? draggingOffset = appointmentDragUpdateDetails.draggingPosition;
+    CalendarResource? sourceResource = appointmentDragUpdateDetails.sourceResource;
+    CalendarResource? targetResource = appointmentDragUpdateDetails.targetResource;
+  }
+
+  void dragEnd(AppointmentDragEndDetails appointmentDragEndDetails) {
+    dynamic appointment = appointmentDragEndDetails.appointment!;
+    CalendarResource? sourceResource = appointmentDragEndDetails.sourceResource;
+    CalendarResource? targetResource = appointmentDragEndDetails.targetResource;
+    DateTime? droppingTime = appointmentDragEndDetails.droppingTime;
+  }
+
+  // onAppointmentResizeStart
+  void resizeStart(AppointmentResizeStartDetails appointmentResizeStartDetails) {
+    dynamic appointment = appointmentResizeStartDetails.appointment;
+    CalendarResource? resource = appointmentResizeStartDetails.resource;
+  }
+
+  void resizeUpdate(AppointmentResizeUpdateDetails appointmentResizeUpdateDetails) {
+    dynamic appointment = appointmentResizeUpdateDetails.appointment;
+    DateTime? resizingTime = appointmentResizeUpdateDetails.resizingTime;
+    Offset? resizingOffset = appointmentResizeUpdateDetails.resizingOffset;
+    CalendarResource? resourceDetails = appointmentResizeUpdateDetails.resource;
+  }
+
+  void resizeEnd(AppointmentResizeEndDetails appointmentResizeEndDetails) {
+    dynamic appointment = appointmentResizeEndDetails.appointment;
+    DateTime? startTime = appointmentResizeEndDetails.startTime;
+    DateTime? endTime = appointmentResizeEndDetails.endTime;
+    CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
+  }
 }
