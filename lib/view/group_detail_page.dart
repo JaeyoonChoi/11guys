@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'dart:math';
 
 class GroupDetailedPage extends StatefulWidget {
   final String pin;
@@ -13,18 +12,17 @@ class GroupDetailedPage extends StatefulWidget {
 }
 
 class _GroupDetailedPageState extends State<GroupDetailedPage> {
-  // 곂치는 시간 가져오기
-  late Future<List<Map<String, dynamic>>> overlappingIntervals;
+  late Future<List<Appointment>> appointments;
   List<Appointment> _appointments = [];
   late AppointmentDataSource _dataSource;
 
   @override
   void initState() {
     super.initState();
-    overlappingIntervals = fetchOverlappingIntervals();
+    appointments = fetchAppointments();
   }
 
-  Future<List<Map<String, dynamic>>> fetchOverlappingIntervals() async {
+  Future<List<Appointment>> fetchAppointments() async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     final response = await http.post(
@@ -33,7 +31,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
         'Content-Type': 'application/json',
       },
       body: jsonEncode(<String, dynamic>{
-        'function': 'findOverlappingIntervals',
+        'function': 'getGroupSchedule',
         'pin': widget.pin,
       }),
     );
@@ -41,39 +39,75 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
     if (response.statusCode == 200) {
       var jsonResponse = jsonDecode(response.body);
       if (jsonResponse['success']) {
-        List<Map<String, dynamic>> intervals = List<Map<String, dynamic>>.from(jsonResponse['overlapping_intervals'].map((interval) => {
-          'start': DateTime.parse(interval[0]), // 수정된 부분
-          'end': DateTime.parse(interval[1]), // 수정된 부분
-          'count': interval[2],
-        }));
+        List<dynamic> intervals = jsonResponse['appointments'];
 
-        _appointments = intervals.map((interval) {
-          return Appointment(
-            startTime: interval['start'],
-            endTime: interval['end'],
-            subject: '${interval['count']} members',
-            color: _getRandomColor(),
-          );
-        }).toList();
+        // 디버깅용 데이터 출력
+        print('Fetched data from Lambda: $intervals');
 
-        _dataSource = AppointmentDataSource(_appointments);
-        return intervals;
+        List<Appointment> appointments = [];
+
+        for (var interval in intervals) {
+          DateTime start = parseDate(interval['start']);
+          DateTime end = parseDate(interval['end']);
+          appointments.add(Appointment(
+            startTime: start,
+            endTime: end,
+            subject: 'Busy',
+            color: Colors.red,
+          ));
+        }
+
+        // Calculate free intervals
+        List<Appointment> freeIntervals = calculateFreeIntervals(appointments);
+        _dataSource = AppointmentDataSource(freeIntervals);
+        return freeIntervals;
       } else {
-        throw Exception('Failed to load overlapping intervals');
+        throw Exception('Failed to load appointments');
       }
     } else {
       throw Exception('Failed to fetch data');
     }
   }
 
-  Color _getRandomColor() {
-    final random = Random();
-    return Color.fromARGB(
-      255,
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
-    );
+  DateTime parseDate(String dateString) {
+    return DateTime.parse(
+        '${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}T${dateString.substring(8, 10)}:${dateString.substring(10, 12)}:00');
+  }
+
+  List<Appointment> calculateFreeIntervals(List<Appointment> appointments) {
+    List<Appointment> result = [];
+    if (appointments.isEmpty) return result;
+
+    // Sort appointments by start time
+    appointments.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    DateTime currentEnd = DateTime.now().subtract(Duration(days: 1));
+
+    for (var appointment in appointments) {
+      if (appointment.startTime.isAfter(currentEnd)) {
+        // Add free interval
+        result.add(Appointment(
+          startTime: currentEnd,
+          endTime: appointment.startTime,
+          subject: 'Free',
+          color: Colors.green,
+        ));
+      }
+      currentEnd = appointment.endTime.isAfter(currentEnd) ? appointment.endTime : currentEnd;
+    }
+
+    // Add the last free interval until the end of the week
+    DateTime endOfWeek = DateTime.now().add(Duration(days: 7 - DateTime.now().weekday));
+    if (currentEnd.isBefore(endOfWeek)) {
+      result.add(Appointment(
+        startTime: currentEnd,
+        endTime: endOfWeek,
+        subject: 'Free',
+        color: Colors.green,
+      ));
+    }
+
+    return result;
   }
 
   @override
@@ -82,43 +116,28 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
       appBar: AppBar(
         title: Text('Group Details'),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: overlappingIntervals,
+      body: FutureBuilder<List<Appointment>>(
+        future: appointments,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No overlapping intervals found.'));
+            return Center(child: Text('No free intervals found.'));
           }
 
-          List<Map<String, dynamic>> intervals = snapshot.data!;
-
-          return Column(
-            children: [
-              Expanded(
-                child: SfCalendar(
-                  view: CalendarView.week,
-                  dataSource: _dataSource,
-                  timeSlotViewSettings: TimeSlotViewSettings(
-                    timeInterval: Duration(minutes: 30),
-                  ),
-                ),
+          return SfCalendar(
+            view: CalendarView.week,
+            dataSource: _dataSource,
+            timeSlotViewSettings: TimeSlotViewSettings(
+              timeInterval: Duration(minutes: 30),
+              timeIntervalHeight: 60,
+              timeTextStyle: TextStyle(
+                fontSize: 12,
+                color: Colors.black,
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: intervals.length,
-                  itemBuilder: (context, index) {
-                    var interval = intervals[index];
-                    return ListTile(
-                      title: Text('${interval['start']} - ${interval['end']}'),
-                      subtitle: Text('${interval['count']} members'),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           );
         },
       ),
@@ -131,3 +150,5 @@ class AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
+
+// 겹치는 시간 찾는 메커니즘 고민
