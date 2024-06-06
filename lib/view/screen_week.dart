@@ -404,3 +404,4 @@ class WeekScreen extends StatelessWidget {
     CalendarResource? resourceDetails = appointmentResizeEndDetails.resource;
   }
 }
+// 주간 캘린더 수정 금지
