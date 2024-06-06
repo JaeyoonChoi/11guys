@@ -11,6 +11,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
 import 'dart:math';
+import 'package:calendar_final/my_voice/my_voice.dart' as globals;
+//
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:intl/intl.dart';
+
 
 class MyApp extends StatelessWidget {
   final String username;
@@ -44,6 +49,11 @@ class MyHomePageState extends State<MyHomePage> {
   List<Appointment> _appointments = [];
   late List<Widget> _pages;
   late AppointmentDataSource _dataSource;
+  // 음성 인식 관련 변수 선언
+  stt.SpeechToText _speechToText = stt.SpeechToText();
+  bool _isListening = false;
+  String _text = '버튼을 누르고 말을 하세요';
+  double _confidence = 1.0;
 
   @override
   void initState() {
@@ -198,7 +208,9 @@ class MyHomePageState extends State<MyHomePage> {
                 fontSize: 13.0),
             backgroundColor: Colors.blueAccent,
             labelBackgroundColor: Colors.blueAccent,
-            onTap: () {}
+            onTap: () {
+              showSpeechDialog();
+            }
         ),
         SpeedDialChild(
           child: const Icon(
@@ -313,6 +325,89 @@ class MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+
+  void showSpeechDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text("바로 말 하세요"),
+              content: Text(_text), //인식된 텍스트를 다이얼로그에 표시
+              actions: [
+                // IconButton(
+                //   icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
+                //   // icon: Icon(Icons.mic),  // test
+                //   onPressed: () {
+                //     _listen(); // 음성 인식 시작/중지
+                //     // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
+                //   },
+                // ),
+                IconButton(
+                  // icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
+                  icon: Icon(Icons.refresh),  // test
+                  onPressed: () {
+                    // todo
+                    // refresh
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () {
+                    // todo
+                    // 데이터 전송
+                    
+                    Navigator.of(context).pop();  // 다이얼로그 닫기
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+// 음성 인식 관련 함수들
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speechToText.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speechToText.listen(
+          onResult: (val) {
+            setState(() {
+              _text = val.recognizedWords;
+              _confidence = val.hasConfidenceRating ? val.confidence : 1.0;
+            });
+            _extractDateTime(_text);
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speechToText.stop();
+    }
+  }
+  void _extractDateTime(String text) {
+    RegExp exp = RegExp(r'(\d{1,2})월\s(\d{1,2})일\s(\d{1,2})시\s(\d{2})분\s(.*)');
+    var matches = exp.firstMatch(text);
+    if (matches != null) {
+      var year = DateTime.now().year.toString(); // 현재 연도 사용
+      var month = matches.group(1)!.padLeft(2, '0');
+      var day = matches.group(2)!.padLeft(2, '0');
+      var hour = matches.group(3)!.padLeft(2, '0');
+      var minute = matches.group(4)!.padLeft(2, '0');
+      var description = matches.group(5);
+
+      var dateTime = '$year$month${day}T$hour$minute';
+      print('Extracted: ($dateTime, $description)');
+    }
+  }
+
 
   String formatDateTime(DateTime date, TimeOfDay time) {
     final formattedDate = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";

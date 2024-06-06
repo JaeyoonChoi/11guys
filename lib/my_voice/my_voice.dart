@@ -94,9 +94,18 @@
 //     }
 //   }
 // }
+
+// 전역 변수 설정
+library globals;
+
+
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:intl/intl.dart';
+
+String shared = '공유 텍스트';
+
+
 
 void main() {
   runApp(MyApp());
@@ -126,10 +135,13 @@ class _VoiceHomePageState extends State<VoiceHomePage> {
   String _text = 'Press the button and start speaking';
   double _confidence = 1.0;
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Confidence: 87.0%
         title: Text('Confidence: ${(_confidence * 100.0).toStringAsFixed(1)}%'),
       ),
       floatingActionButton: FloatingActionButton(
@@ -165,6 +177,7 @@ class _VoiceHomePageState extends State<VoiceHomePage> {
           onResult: (val) {
             setState(() {
               _text = val.recognizedWords;
+              String shared_text = val.recognizedWords;
               _confidence = val.hasConfidenceRating ? val.confidence : 1.0;
             });
             _extractDateTime(_text);
@@ -194,3 +207,5 @@ class _VoiceHomePageState extends State<VoiceHomePage> {
   }
 }
 //음성 인식하는 페이지를 만들었습니다..
+
+
