@@ -101,7 +101,8 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: Text('Login'),
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.white,
         padding: EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
