@@ -11,8 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
 import 'dart:math';
-import 'package:calendar_final/my_voice/my_voice.dart' as globals;
-//
+
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:intl/intl.dart';
 
@@ -52,7 +51,7 @@ class MyHomePageState extends State<MyHomePage> {
   // 음성 인식 관련 변수 선언
   stt.SpeechToText _speechToText = stt.SpeechToText();
   bool _isListening = false;
-  String _text = '버튼을 누르고 말을 하세요';
+  String _text = '말 하세요';
   double _confidence = 1.0;
 
   @override
@@ -327,31 +326,36 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void showSpeechDialog() {
+    // _listen();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text("바로 말 하세요"),
+              title: Text("마이크를 누르고 말 하세요"),
               content: Text(_text), //인식된 텍스트를 다이얼로그에 표시
               actions: [
-                // IconButton(
-                //   icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
-                //   // icon: Icon(Icons.mic),  // test
-                //   onPressed: () {
-                //     _listen(); // 음성 인식 시작/중지
-                //     // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
-                //   },
-                // ),
                 IconButton(
-                  // icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
-                  icon: Icon(Icons.refresh),  // test
+                  icon: Icon(_isListening ? Icons.stop : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
+                  // icon: Icon(Icons.mic),  // test
                   onPressed: () {
-                    // todo
-                    // refresh
+                    _listen(); // 음성 인식 시작/중지
+                    setState(() {});  // 상태 업데이트
+                    // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
                   },
                 ),
+                
+                // IconButton(
+                //   // icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
+                //   icon: Icon(Icons.refresh),  // test
+                //   onPressed: () {
+                //     _listen();
+                //     // todo
+                //     // refresh
+                //   },
+                // ),
+                
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
