@@ -51,6 +51,7 @@ void showEditDialog(BuildContext context, String username, dynamic appointment) 
   final TextEditingController titleController = TextEditingController(text: appointment.subject);
   DateTime startTime = appointment.startTime;
   DateTime endTime = appointment.endTime;
+  bool isRepeat = false; // 매주 반복 여부 저장 변수
 
   showDialog(
     context: context,
@@ -122,6 +123,18 @@ void showEditDialog(BuildContext context, String username, dynamic appointment) 
               },
               child: Text("끝 시간"),
             ),
+            // 매주 반복 체크박스 추가
+            Row(
+              children: [
+                Checkbox(
+                  value: isRepeat,
+                  onChanged: (bool? value) {
+                    isRepeat = value!;
+                  },
+                ),
+                Text("매주 반복"),
+              ],
+            )
           ],
         ),
         actions: [
