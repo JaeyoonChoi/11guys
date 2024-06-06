@@ -195,9 +195,13 @@ class WeekScreen extends StatelessWidget {
               // 삭제
               IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {
-                  // 일정 삭제 로직
-                  // todo
+                onPressed: () async {
+                  bool success = await deleteSchedule(username, appointment.startTime, appointment.endTime);
+                  if (success) {
+                    Navigator.of(context).pop();
+                  } else {
+                    // 오류 처리 로직
+                  }
                 },
               )
             ],
@@ -284,6 +288,37 @@ class WeekScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<bool> deleteSchedule(String username, DateTime start, DateTime end) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    Map<String, dynamic> requestBody = {
+      'function': 'delete',
+      'id': username, // username을 id로 사용
+      'start': formatDateTime(start),
+      'end': formatDateTime(end),
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        body: jsonEncode(requestBody),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['success'] == true;
+      } else {
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return false;
+    }
   }
 
   Future<bool> editSchedule(
