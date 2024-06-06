@@ -150,3 +150,5 @@ class AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
+
+// 겹치는 시간 찾는 메커니즘 고민
