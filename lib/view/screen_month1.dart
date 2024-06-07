@@ -55,6 +55,7 @@ class MonthScreen extends StatelessWidget {
   }
 }
 
+
 // 일정 수정 다이얼로그 함수 : showEditDialog()
 void showEditDialog(BuildContext context, String username, dynamic appointment) {
   final TextEditingController titleController =

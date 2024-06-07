@@ -55,6 +55,7 @@ class WeekScreen extends StatelessWidget {
     );
   }
 
+
   // 일정 추가 다이얼로그 함수 : showInsertDialog()
   void showInsertDialog(BuildContext context, String username, DateTime startTime, DateTime endTime) {
     final TextEditingController titleController = TextEditingController();

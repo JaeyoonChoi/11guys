@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+
 class GroupDetailedPage extends StatefulWidget {
   final String pin;
   GroupDetailedPage({required this.pin});

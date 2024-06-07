@@ -106,7 +106,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
         );
       },
     );
-  }
+
 
   @override
   Widget build(BuildContext context) {
