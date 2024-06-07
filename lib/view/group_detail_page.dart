@@ -15,6 +15,9 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
   late Future<List<Appointment>> appointments;
   List<Appointment> _appointments = [];
   late AppointmentDataSource _dataSource;
+  bool _excludeNightTime = true;
+  bool _viewByRatio = false;
+  int _totalMembers = 0;
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
         print('Fetched data from Lambda: $intervals');
 
         List<Appointment> appointments = [];
+        Set<String> uniqueIds = {};
 
         for (var interval in intervals) {
           DateTime start = parseDate(interval['start']);
@@ -52,10 +56,14 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
           appointments.add(Appointment(
             startTime: start,
             endTime: end,
-            subject: 'Busy',
+            subject: interval['subject'],
             color: Colors.red,
+            id: interval['id'],
           ));
+          uniqueIds.add(interval['id'].toString());
         }
+
+        _totalMembers = uniqueIds.length;
 
         // Calculate overlapping intervals
         List<Appointment> overlappingIntervals = calculateOverlappingIntervals(appointments);
@@ -106,12 +114,15 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
       int count = 0;
       DateTime intervalStart = intervals[i];
       DateTime intervalEnd = intervals[i + 1];
+      Set<String> overlappingIds = {};
 
       for (var appointment in appointments) {
         if (appointment.startTime.isBefore(intervalEnd) && appointment.endTime.isAfter(intervalStart)) {
-          count++;
+          overlappingIds.add(appointment.id.toString());
         }
       }
+
+      count = overlappingIds.length;
 
       if (count > 0) {
         if (!overlapMap.containsKey(count)) {
@@ -121,7 +132,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
           startTime: intervalStart,
           endTime: intervalEnd,
           subject: '$count overlaps',
-          color: getColorForOverlap(count),
+          color: getColorForOverlap(count, _totalMembers),
         ));
       }
     }
@@ -153,17 +164,32 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
     return mergedIntervals;
   }
 
-  Color getColorForOverlap(int count) {
-    if (count == 1) {
-      return Colors.red.shade100;
-    } else if (count == 2) {
-      return Colors.red.shade200;
-    } else if (count == 3) {
-      return Colors.red.shade300;
-    } else if (count == 4) {
-      return Colors.red.shade400;
+  Color getColorForOverlap(int count, int totalMembers) {
+    if (_viewByRatio) {
+      double percentage = (count / totalMembers) * 100;
+      if (percentage <= 10) {
+        return Colors.red.shade100;
+      } else if (percentage <= 20) {
+        return Colors.red.shade200;
+      } else if (percentage <= 30) {
+        return Colors.red.shade300;
+      } else if (percentage <= 40) {
+        return Colors.red.shade400;
+      } else {
+        return Colors.red.shade500;
+      }
     } else {
-      return Colors.red.shade500;
+      if (count == 1) {
+        return Colors.red.shade100;
+      } else if (count == 2) {
+        return Colors.red.shade200;
+      } else if (count == 3) {
+        return Colors.red.shade300;
+      } else if (count == 4) {
+        return Colors.red.shade400;
+      } else {
+        return Colors.red.shade500;
+      }
     }
   }
 
@@ -173,30 +199,73 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
       appBar: AppBar(
         title: Text('Group Details'),
       ),
-      body: FutureBuilder<List<Appointment>>(
-        future: appointments,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No overlapping intervals found.'));
-          }
-
-          return SfCalendar(
-            view: CalendarView.week,
-            dataSource: _dataSource,
-            timeSlotViewSettings: TimeSlotViewSettings(
-              timeInterval: Duration(minutes: 30),
-              timeIntervalHeight: 60,
-              timeTextStyle: TextStyle(
-                fontSize: 12,
-                color: Colors.black,
-              ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _excludeNightTime,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _excludeNightTime = value!;
+                        });
+                      },
+                    ),
+                    Text('새벽시간 지우기'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _viewByRatio,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _viewByRatio = value!;
+                          appointments = fetchAppointments(); // Recalculate appointments to update colors
+                        });
+                      },
+                    ),
+                    Text('비율로 보기'),
+                  ],
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: FutureBuilder<List<Appointment>>(
+              future: appointments,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No overlapping intervals found.'));
+                }
+
+                return SfCalendar(
+                  view: CalendarView.week,
+                  dataSource: _dataSource,
+                  timeSlotViewSettings: TimeSlotViewSettings(
+                    timeInterval: Duration(minutes: 30),
+                    timeIntervalHeight: 60,
+                    timeTextStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                    startHour: _excludeNightTime ? 6 : 0,
+                    endHour: _excludeNightTime ? 24 : 24,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
