@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-
 class GroupDetailedPage extends StatefulWidget {
   final String pin;
   GroupDetailedPage({required this.pin});
@@ -132,7 +131,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
         overlapMap[count]!.add(Appointment(
           startTime: intervalStart,
           endTime: intervalEnd,
-          subject: '$count overlaps',
+          subject: '$count명',
           color: getColorForOverlap(count, _totalMembers),
         ));
       }
@@ -198,7 +197,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Group Details'),
+        title: Text('그룹 상세 정보'),
       ),
       body: Column(
         children: [
@@ -246,7 +245,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No overlapping intervals found.'));
+                  return Center(child: Text('겹치는 일정이 없습니다.'));
                 }
 
                 return SfCalendar(
@@ -262,6 +261,20 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
                     startHour: _excludeNightTime ? 6 : 0,
                     endHour: _excludeNightTime ? 24 : 24,
                   ),
+                  appointmentBuilder: (context, details) {
+                    final appointment = details.appointments.first;
+                    return Container(
+                      alignment: Alignment.center,
+                      color: appointment.color,
+                      child: Text(
+                        appointment.subject,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
