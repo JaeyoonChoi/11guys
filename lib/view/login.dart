@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'package:calendar_final/view/group_calendar.dart';
+import 'package:calendar_final/view/group_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:calendar_final/view/main.dart';
 
-void main() {
-  runApp(LoginApp());
-}
+// void main() {
+//   runApp(LoginApp());
+// }
 
 class LoginApp extends StatelessWidget {
   @override
@@ -16,6 +18,22 @@ class LoginApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: LoginPage(),
+
+      // routing
+      initialRoute: '.',  // 초기 경로 설정
+      routes: {
+        '/': (context) => GroupCalendar(username: '사용자명'),
+        '/detail': (context) => GroupDetailedPage(pin: 'pin'), // '/' 경로에 HomePage 위젯을 연결합니다.
+      },
+      onGenerateRoute: (settings) {
+        // 동적 경로를 처리하기 위한 설정
+        if (settings.name != null && settings.name!.startsWith('/detail/')) {
+          final id = settings.name!.replaceFirst('/detail/', '');  // '/detail/' 뒤의 ID를 추출
+          return MaterialPageRoute(builder: (context) => GroupDetailedPage(pin: id),  //추출한 ID를 사용하여 GroupDetailPage 위젯 생성
+          );
+        }
+        return null;  // 처리할 수 없는 경로는 null읇 반환
+      },
     );
   }
 }

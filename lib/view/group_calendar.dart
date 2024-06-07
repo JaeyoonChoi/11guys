@@ -16,6 +16,25 @@ class GroupCalendar extends StatefulWidget {
   _GroupCalendarState createState() => _GroupCalendarState();
 }
 
+// routing
+class GroupDetailPage extends StatelessWidget {
+  final String id;
+
+  GroupDetailPage({required this.id}); // ID를 받아서 생성자에서 설정합니다.
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Group Detail Page'), // 앱 바의 제목을 설정합니다.
+      ),
+      body: Center(
+        child: Text('Detail for group ID: $id'), // 받은 ID를 화면에 표시합니다.
+      ),
+    );
+  }
+}
+
 class _GroupCalendarState extends State<GroupCalendar> {
   List<Map<String, dynamic>> groups = [];
 
