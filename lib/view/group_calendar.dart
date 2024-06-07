@@ -106,6 +106,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
         );
       },
     );
+  }
 
 
   @override
