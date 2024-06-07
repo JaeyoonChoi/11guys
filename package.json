@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "build": "flutter build web"
   },
   "author": "",
   "license": "ISC",
