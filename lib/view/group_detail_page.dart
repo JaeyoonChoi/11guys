@@ -57,10 +57,10 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
           ));
         }
 
-        // Calculate free intervals
-        List<Appointment> freeIntervals = calculateFreeIntervals(appointments);
-        _dataSource = AppointmentDataSource(freeIntervals);
-        return freeIntervals;
+        // Calculate overlapping intervals
+        List<Appointment> overlappingIntervals = calculateOverlappingIntervals(appointments);
+        _dataSource = AppointmentDataSource(overlappingIntervals);
+        return overlappingIntervals;
       } else {
         throw Exception('Failed to load appointments');
       }
@@ -74,40 +74,97 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
         '${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}T${dateString.substring(8, 10)}:${dateString.substring(10, 12)}:00');
   }
 
-  List<Appointment> calculateFreeIntervals(List<Appointment> appointments) {
-    List<Appointment> result = [];
-    if (appointments.isEmpty) return result;
+  List<Appointment> calculateOverlappingIntervals(List<Appointment> appointments) {
+    if (appointments.isEmpty) return [];
 
-    // Sort appointments by start time
-    appointments.sort((a, b) => a.startTime.compareTo(b.startTime));
-
-    DateTime currentEnd = DateTime.now().subtract(Duration(days: 1));
+    // Get the earliest start time and the latest end time
+    DateTime earliestStart = appointments.first.startTime;
+    DateTime latestEnd = appointments.first.endTime;
 
     for (var appointment in appointments) {
-      if (appointment.startTime.isAfter(currentEnd)) {
-        // Add free interval
-        result.add(Appointment(
-          startTime: currentEnd,
-          endTime: appointment.startTime,
-          subject: 'Free',
-          color: Colors.green,
+      if (appointment.startTime.isBefore(earliestStart)) {
+        earliestStart = appointment.startTime;
+      }
+      if (appointment.endTime.isAfter(latestEnd)) {
+        latestEnd = appointment.endTime;
+      }
+    }
+
+    // Create 5-minute intervals between the earliest start and latest end
+    List<DateTime> intervals = [];
+    DateTime current = earliestStart;
+
+    while (current.isBefore(latestEnd)) {
+      intervals.add(current);
+      current = current.add(Duration(minutes: 5));
+    }
+
+    // Count overlaps
+    Map<int, List<Appointment>> overlapMap = {};
+
+    for (int i = 0; i < intervals.length - 1; i++) {
+      int count = 0;
+      DateTime intervalStart = intervals[i];
+      DateTime intervalEnd = intervals[i + 1];
+
+      for (var appointment in appointments) {
+        if (appointment.startTime.isBefore(intervalEnd) && appointment.endTime.isAfter(intervalStart)) {
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        if (!overlapMap.containsKey(count)) {
+          overlapMap[count] = [];
+        }
+        overlapMap[count]!.add(Appointment(
+          startTime: intervalStart,
+          endTime: intervalEnd,
+          subject: '$count overlaps',
+          color: getColorForOverlap(count),
         ));
       }
-      currentEnd = appointment.endTime.isAfter(currentEnd) ? appointment.endTime : currentEnd;
     }
 
-    // Add the last free interval until the end of the week
-    DateTime endOfWeek = DateTime.now().add(Duration(days: 7 - DateTime.now().weekday));
-    if (currentEnd.isBefore(endOfWeek)) {
-      result.add(Appointment(
-        startTime: currentEnd,
-        endTime: endOfWeek,
-        subject: 'Free',
-        color: Colors.green,
-      ));
-    }
+    // Merge intervals of the same color
+    List<Appointment> mergedIntervals = [];
 
-    return result;
+    overlapMap.forEach((count, appointments) {
+      if (appointments.isNotEmpty) {
+        Appointment current = appointments[0];
+
+        for (int i = 1; i < appointments.length; i++) {
+          if (appointments[i].startTime == current.endTime && appointments[i].color == current.color) {
+            current = Appointment(
+              startTime: current.startTime,
+              endTime: appointments[i].endTime,
+              subject: current.subject,
+              color: current.color,
+            );
+          } else {
+            mergedIntervals.add(current);
+            current = appointments[i];
+          }
+        }
+        mergedIntervals.add(current);
+      }
+    });
+
+    return mergedIntervals;
+  }
+
+  Color getColorForOverlap(int count) {
+    if (count == 1) {
+      return Colors.red.shade100;
+    } else if (count == 2) {
+      return Colors.red.shade200;
+    } else if (count == 3) {
+      return Colors.red.shade300;
+    } else if (count == 4) {
+      return Colors.red.shade400;
+    } else {
+      return Colors.red.shade500;
+    }
   }
 
   @override
@@ -124,7 +181,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No free intervals found.'));
+            return Center(child: Text('No overlapping intervals found.'));
           }
 
           return SfCalendar(
@@ -150,5 +207,3 @@ class AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
-
-// 겹치는 시간 찾는 메커니즘 고민
