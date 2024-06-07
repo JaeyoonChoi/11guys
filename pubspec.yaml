@@ -93,7 +93,7 @@ flutter:
   fonts:
     - family: HancomMalangMalang
       fonts:
-        - asset: assets/fonts/HancomMAlangMalang-Bold.otf
+        - asset: assets/fonts/HancomMalangMalang-Bold.otf
         - asset: assets/fonts/HancomMalangMalang-Regular.otf
 #    - asset: assets/fonts/HancomMalangMalang-Bold.ttf
 #    - asset: assets/fonts/HancomMAlangMalang-Bold.otf
