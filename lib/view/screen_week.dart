@@ -3,8 +3,8 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:calendar_final/provider/appointment_control.dart';
-import 'package:calendar_final/view/main.dart';
-import 'main.dart';
+import 'package:calendar_final/view/background.dart';
+import 'background.dart';
 
 class WeekScreen extends StatelessWidget {
   final String username;
