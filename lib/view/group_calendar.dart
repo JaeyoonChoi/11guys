@@ -245,6 +245,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
                                 MaterialPageRoute(
                                   builder: (context) => TimeMatchingPage(
                                     pin: group['pin'],
+                                    username: widget.username,  // 추가된 부분
                                   ),
                                 ),
                               );

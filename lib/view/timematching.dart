@@ -5,7 +5,8 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class TimeMatchingPage extends StatefulWidget {
   final String pin;
-  TimeMatchingPage({required this.pin});
+  final String username;
+  TimeMatchingPage({required this.pin, required this.username});
 
   @override
   _TimeMatchingPageState createState() => _TimeMatchingPageState();
@@ -22,7 +23,13 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
   @override
   void initState() {
     super.initState();
-    appointments = fetchAppointments();
+    _refreshAppointments();
+  }
+
+  void _refreshAppointments() {
+    setState(() {
+      appointments = fetchAppointments();
+    });
   }
 
   Future<List<Appointment>> fetchAppointments() async {
@@ -68,9 +75,56 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
         // Calculate overlapping intervals
         List<Appointment> overlappingIntervals = calculateOverlappingIntervals(appointments);
         _dataSource = AppointmentDataSource(overlappingIntervals);
+
+        // Fetch user appointments and add them to the list
+        List<Appointment> userAppointments = await fetchUserAppointments();
+        overlappingIntervals.addAll(userAppointments);
+
         return overlappingIntervals;
       } else {
         throw Exception('Failed to load appointments');
+      }
+    } else {
+      throw Exception('Failed to fetch data');
+    }
+  }
+
+  Future<List<Appointment>> fetchUserAppointments() async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    final response = await http.post(
+      Uri.parse(lambdaArn),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'function': 'get_timematching',
+        'pin': widget.pin,
+        'user_id': widget.username,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success']) {
+        List<dynamic> intervals = jsonResponse['appointments'];
+
+        List<Appointment> appointments = [];
+
+        for (var interval in intervals) {
+          DateTime start = parseDate(interval['start']);
+          DateTime end = parseDate(interval['end']);
+          appointments.add(Appointment(
+            startTime: start,
+            endTime: end,
+            subject: interval['subject'],
+            color: Colors.lightGreen, // 연두색 블록
+          ));
+        }
+
+        return appointments;
+      } else {
+        throw Exception('Failed to load user appointments');
       }
     } else {
       throw Exception('Failed to fetch data');
@@ -199,12 +253,107 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
     }
   }
 
+  Future<void> _showAddAppointmentDialog(DateTime startTime) async {
+    TextEditingController subjectController = TextEditingController();
+    TextEditingController durationController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('약속 잡기'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: subjectController,
+                decoration: InputDecoration(hintText: '약속 내용'),
+              ),
+              TextField(
+                controller: durationController,
+                decoration: InputDecoration(hintText: '시간 (시간 단위)'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('확인'),
+              onPressed: () async {
+                String subject = subjectController.text;
+                int duration = int.parse(durationController.text);
+                DateTime endTime = startTime.add(Duration(hours: duration));
+
+                bool success = await _addTimematching(subject, startTime, endTime);
+                if (success) {
+                  _refreshAppointments(); // Refresh the appointments
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> _addTimematching(String subject, DateTime startTime, DateTime endTime) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'add_timematching',
+          'pin': widget.pin,
+          'user_id': widget.username,
+          'subject': subject,
+          'start': _formatDateTime(startTime),
+          'end': _formatDateTime(endTime),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        print('Add Timematching Response: $jsonResponse');
+        return jsonResponse['success'];
+      } else {
+        print('Add Timematching Error: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Add Timematching Exception: $e');
+      return false;
+    }
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return dateTime.year.toString() +
+        dateTime.month.toString().padLeft(2, '0') +
+        dateTime.day.toString().padLeft(2, '0') +
+        dateTime.hour.toString().padLeft(2, '0') +
+        dateTime.minute.toString().padLeft(2, '0');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('시간 매칭'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _refreshAppointments,
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
@@ -240,7 +389,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                       onChanged: (bool? value) {
                         setState(() {
                           _viewByRatio = value!;
-                          appointments = fetchAppointments(); // Recalculate appointments to update colors
+                          _refreshAppointments(); // Recalculate appointments to update colors
                         });
                       },
                     ),
@@ -275,6 +424,11 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                     startHour: _excludeNightTime ? 6 : 0,
                     endHour: _excludeNightTime ? 24 : 24,
                   ),
+                  onTap: (details) {
+                    if (details.targetElement == CalendarElement.calendarCell) {
+                      _showAddAppointmentDialog(details.date!);
+                    }
+                  },
                   appointmentBuilder: (context, details) {
                     final appointment = details.appointments.first;
                     return Container(
