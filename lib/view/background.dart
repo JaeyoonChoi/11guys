@@ -29,6 +29,11 @@ class MyApp extends StatelessWidget {
     });
 
     return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.white, // 앱의 기본 색상 설정
+        // floatingActionButtonTheme: Colors.white,
+        // bottomNavigationBarTheme: Colors.white,
+      ),
       home: MyHomePage(username: username),
     );
   }
@@ -151,6 +156,7 @@ class MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         flexibleSpace: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -167,6 +173,7 @@ class MyHomePageState extends State<MyHomePage> {
         children: _pages,  // 페이지 스택
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor : Colors.white,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),

@@ -19,9 +19,13 @@ class MonthScreen extends StatelessWidget {
       home: Scaffold(
         // appBar: AppBar(), //상
         body: Container(
+          color: Colors.white,  // 배경색(white)
           // 중
           child: SfCalendar(
             view: CalendarView.month,
+            headerStyle:CalendarHeaderStyle(
+              backgroundColor: Colors.white,  // 배경 색 수정(white)
+            ),
             monthViewSettings: MonthViewSettings(
               showTrailingAndLeadingDates: false,
               // navigationDirection: MonthNavigationDirection.horizontal,   // 슬라이드 가로

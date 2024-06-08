@@ -191,9 +191,12 @@ class _GroupCalendarState extends State<GroupCalendar> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: Text('그룹 캘린더'),
         ),
-        body: Column(
+        body: Container(
+          color: Colors.white,
+          child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Expanded(
@@ -259,6 +262,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
               ),
             ),
           ],
+        ),
         ),
         floatingActionButton: floatingButtons(context),
       ),

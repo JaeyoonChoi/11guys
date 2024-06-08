@@ -19,6 +19,9 @@ class WeekScreen extends StatelessWidget {
         color: Colors.white,
         child: SfCalendar(
             view: CalendarView.week,
+            headerStyle: CalendarHeaderStyle(
+              backgroundColor: Colors.white,  // 배경 색 수정(white)
+            ),
             showNavigationArrow: true,
             dataSource: dataSource,
             // Drag & Drop
