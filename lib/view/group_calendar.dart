@@ -53,7 +53,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
     }
   }
 
-  Future<List<String>> _fetchGroupMembers(String pin) async {
+  Future<List<Map<String, String>>> _fetchGroupMembers(String pin) async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     final response = await http.post(
@@ -70,7 +70,10 @@ class _GroupCalendarState extends State<GroupCalendar> {
     if (response.statusCode == 200) {
       var jsonResponse = jsonDecode(response.body);
       if (jsonResponse['success']) {
-        return List<String>.from(jsonResponse['members']);
+        return List<Map<String, String>>.from(jsonResponse['members'].map((member) => {
+          'user_id': member['user_id'].toString(),
+          'name': member['name'].toString()
+        }));
       } else {
         print('Failed to fetch group members');
         return [];
@@ -82,7 +85,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
   }
 
   void _showGroupMembersDialog(String pin) async {
-    List<String> members = await _fetchGroupMembers(pin);
+    List<Map<String, String>> members = await _fetchGroupMembers(pin);
 
     showDialog(
       context: context,
@@ -91,7 +94,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
           title: Text('그룹 멤버'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: members.map((member) => Text(member)).toList(),
+              children: members.map((member) => Text('${member['user_id']} (${member['name']})')).toList(),
             ),
           ),
           actions: <Widget>[
