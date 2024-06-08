@@ -5,11 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:calendar_final/view/background.dart';
 
-// void main() {
-//   runApp(LoginApp());
-// }
-
-
 class LoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -17,6 +12,7 @@ class LoginApp extends StatelessWidget {
       title: 'Login App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'HancomMalangMalang', // 글자체 설정
       ),
       home: LoginPage(),
 
@@ -24,7 +20,7 @@ class LoginApp extends StatelessWidget {
       initialRoute: '/',  // 초기 경로 설정
       routes: {
         '/timematching': (context) => GroupCalendar(username: '사용자명'),
-        '/detail': (context) => GroupDetailedPage(pin: ''), // '/' 경로에 HomePage 위젯을 연결합니다.
+        '/detail': (context) => GroupDetailedPage(pin: ''),  // '/' 경로에 HomePage 위젯을 연결합니다.
         // '/timematching': (context) => GroupCalendar(username: '사용자명',),
       },
       onGenerateRoute: (settings) {
@@ -85,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MyApp(username: username, password: password), // 전달
+          builder: (context) => MyApp(username: username, password: password),  // 전달
         ),
       );
     } else {
@@ -120,35 +116,73 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        backgroundColor: Color(0xFFb2ddef),
+        elevation: 0,  // AppBar의 그림자 제거
       ),
       body: Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+        color: Color(0xFFb2ddef),
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
-            SizedBox(height: 20.0),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: '학번',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: '비밀번호',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  obscureText: true,
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: _handleLogin,
+                  child: Text('로그인'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
+                    foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                  ),
+                ),
+                SizedBox(height: 10.0),
+                TextButton(
+                  onPressed: _goToSignUp,
+                  child: Text('회원가입'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black, // 버튼 텍스트 색 설정
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _handleLogin,
-              child: Text('Sign In'),
-            ),
-            SizedBox(height: 10.0),
-            TextButton(
-              onPressed: _goToSignUp,
-              child: Text('Sign Up'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -186,39 +220,95 @@ class SignUpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sign Up'),
+        backgroundColor: Color(0xFFb2ddef),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _newUsernameController,
-              decoration: InputDecoration(labelText: 'New Username'),
+      body: Container(
+        color: Color(0xFFb2ddef),
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
-            SizedBox(height: 20.0),
-            TextField(
-              controller: _newPasswordController,
-              decoration: InputDecoration(labelText: 'New Password'),
-              obscureText: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextField(
+                  controller: _newUsernameController,
+                  decoration: InputDecoration(
+                    labelText: 'New Username',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                TextField(
+                  controller: _newPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  obscureText: true,
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                TextField(
+                  controller: _confirmPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  obscureText: true,
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                ),
+                SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: _signUp,
+                  child: Text('회원가입'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
+                    foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 20.0),
-            TextField(
-              controller: _confirmPasswordController,
-              decoration: InputDecoration(labelText: 'Confirm Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20.0),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _signUp,
-              child: Text('Sign Up'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -231,6 +321,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
+        backgroundColor: Color(0xFFb2ddef),
       ),
       body: Center(
         child: Text(
