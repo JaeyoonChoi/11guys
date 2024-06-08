@@ -120,7 +120,8 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Color(0xFFb2ddef),
         elevation: 0,  // AppBar의 그림자 제거
       ),
-      body: Container(
+      body: SingleChildScrollView(
+        child: Container(
         color: Color(0xFFb2ddef),
         child: Align(
           alignment: Alignment.topCenter, //
@@ -138,6 +139,7 @@ class _LoginPageState extends State<LoginPage> {
 
               Container(
                 width: MediaQuery.of(context).size.width * 0.8,
+                // height: 0,
                 padding: EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -197,10 +199,12 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
+              SizedBox(height: 500),
             ]
           ),
           ),
         ),
+      ),
       ),
     );
   }
