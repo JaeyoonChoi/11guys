@@ -74,6 +74,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+     - assets/images/magu_main_logo.png
+     - assets/images/magu_logo.png
+     - assets/images/magu_text.png
      # 사진 가져오기
      - images/logo.png
      - images/magu.png

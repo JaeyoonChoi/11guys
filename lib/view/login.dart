@@ -112,6 +112,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+// 디자인
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,67 +122,83 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Container(
         color: Color(0xFFb2ddef),
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            padding: EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: '학번',
-                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+        child: Align(
+          alignment: Alignment.topCenter, //
+          child: Padding(
+            padding: EdgeInsets.only(top: 40.0),  // 상단 여백 추가
+            child: Column(// 로고
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Image.asset(
+                'assets/images/magu_main_logo.png',
+                width: 200,
+                height:200,
+              ),
+              SizedBox(height: 0),  // 로고와 로그인 폼 사이 간격
+
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                padding: EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                SizedBox(height: 20.0),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: '비밀번호',
-                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: '학번',
+                        labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.black), // 입력 글자색 설정
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                    SizedBox(height: 20.0),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: '비밀번호',
+                        labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                        ),
+                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.black), // 입력 글자색 설정
                     ),
-                  ),
-                  obscureText: true,
-                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                    SizedBox(height: 20.0),
+                    ElevatedButton(
+                      onPressed: _handleLogin,
+                      child: Text('로그인'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
+                        foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    TextButton(
+                      onPressed: _goToSignUp,
+                      child: Text('회원가입'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.black, // 버튼 텍스트 색 설정
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 20.0),
-                ElevatedButton(
-                  onPressed: _handleLogin,
-                  child: Text('로그인'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
-                    foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
-                  ),
-                ),
-                SizedBox(height: 10.0),
-                TextButton(
-                  onPressed: _goToSignUp,
-                  child: Text('회원가입'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.black, // 버튼 텍스트 색 설정
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ]
+          ),
           ),
         ),
       ),
