@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'group_detail_page.dart';
+import 'timematching.dart';
 
 void main() => runApp(GroupCalendar(username: '사용자명'));
 
@@ -209,7 +210,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     dataRowHeight: 64.0,
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))), // 인원 수 열 추가
+                      DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))),
+                      DataColumn(label: Text('시간매칭', style: TextStyle(fontSize: 16))), // '시간매칭' 열 추가
                     ],
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
@@ -234,6 +236,19 @@ class _GroupCalendarState extends State<GroupCalendar> {
                                 _showGroupMembersDialog(group['pin']);
                               },
                             ),
+                          ),
+                          DataCell(
+                            Icon(Icons.access_time, color: Colors.grey), // 시계 모양의 아이콘 추가
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TimeMatchingPage(
+                                    pin: group['pin'],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       );
