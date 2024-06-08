@@ -623,7 +623,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                   onLongPress: (details) {
                     if (details.targetElement == CalendarElement.appointment) {
                       final appointment = details.appointments!.first;
-                      if (appointment.color == Colors.yellow) {
+                      if (appointment.color == Colors.lightGreenAccent) {
                         _selectedAppointment = appointment;
                         _showVoteDialog();
                       }
