@@ -361,7 +361,9 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 child: Text('투표하기'),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await _showVoteStatusDialog();
+                },
                 child: Text('투표 현황 보기'),
               ),
               ElevatedButton(
@@ -381,6 +383,87 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
         );
       },
     );
+  }
+
+  Future<void> _showVoteStatusDialog() async {
+    if (_selectedAppointment != null) {
+      String subject = _selectedAppointment!.subject;
+      DateTime start = _selectedAppointment!.startTime;
+      DateTime end = _selectedAppointment!.endTime;
+
+      List<Map<String, String>> voters = await _fetchVoters(subject, start, end);
+      int voterCount = voters.length;
+
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('투표 현황 ($voterCount명)'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: voters.map((voter) {
+                return ListTile(
+                  title: Text(voter['name']!),
+                  subtitle: Text(voter['id']!),
+                );
+              }).toList(),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('닫기'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<List<Map<String, String>>> _fetchVoters(String subject, DateTime start, DateTime end) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'get_vote_status',
+          'pin': widget.pin,
+          'subject': subject,
+          'start': _formatDateTime(start),
+          'end': _formatDateTime(end),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success']) {
+          List<dynamic> voterData = jsonResponse['voters'];
+          List<Map<String, String>> voters = [];
+
+          for (var voter in voterData) {
+            voters.add({
+              'id': voter['id'],
+              'name': voter['name'],
+            });
+          }
+
+          return voters;
+        } else {
+          throw Exception('Failed to load vote status');
+        }
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      print('Fetch Voters Exception: $e');
+      return [];
+    }
   }
 
   Future<void> _voteForAppointment() async {
