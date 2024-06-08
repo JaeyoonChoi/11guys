@@ -198,6 +198,14 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('그룹 상세 정보'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text('PIN: ${widget.pin}'),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

@@ -16,7 +16,6 @@ class GroupCalendar extends StatefulWidget {
   _GroupCalendarState createState() => _GroupCalendarState();
 }
 
-
 class _GroupCalendarState extends State<GroupCalendar> {
   List<Map<String, dynamic>> groups = [];
 
@@ -108,6 +107,80 @@ class _GroupCalendarState extends State<GroupCalendar> {
     );
   }
 
+  Future<bool> _deleteGroup(String pin) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'deleteGroup',
+          'pin': pin,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        print('Delete Group Response: $jsonResponse');
+        return jsonResponse['success'];
+      } else {
+        print('Delete Group Error: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Delete Group Exception: $e');
+      return false;
+    }
+  }
+
+  void _showDeleteGroupDialog(BuildContext context) {
+    TextEditingController pinController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('그룹 캘린더 삭제'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: pinController,
+                  decoration: InputDecoration(hintText: "PIN번호"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('확인'),
+              onPressed: () async {
+                String pin = pinController.text;
+                bool success = await _deleteGroup(pin);
+                if (success) {
+                  setState(() {
+                    groups.removeWhere((group) => group['pin'] == pin);
+                  });
+                  print('Successfully deleted group');
+                } else {
+                  print('Failed to delete group');
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +206,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     dataRowHeight: 64.0,
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('PIN번호', style: TextStyle(fontSize: 16))),
                       DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))), // 인원 수 열 추가
-                      DataColumn(label: Text('삭제', style: TextStyle(fontSize: 16))),
+                      DataColumn(label: Text('시간 매칭', style: TextStyle(fontSize: 16))), // 시간 매칭 열 추가
                     ],
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
@@ -153,7 +225,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
                               );
                             },
                           ),
-                          DataCell(Text(group['pin'], style: TextStyle(fontSize: 14))),
                           DataCell(
                             GestureDetector(
                               child: Text(group['members_count'].toString(), style: TextStyle(fontSize: 14)), // 인원 수 표시
@@ -162,17 +233,9 @@ class _GroupCalendarState extends State<GroupCalendar> {
                               },
                             ),
                           ),
-                          DataCell(IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () async {
-                              bool success = await _deleteGroup(group['pin']);
-                              if (success) {
-                                setState(() {
-                                  groups.remove(group);
-                                });
-                              }
-                            },
-                          )),
+                          DataCell(
+                            Icon(Icons.access_time, color: Colors.grey), // 시계 아이콘 추가
+                          ),
                         ],
                       );
                     }).toList(),
@@ -195,25 +258,50 @@ class _GroupCalendarState extends State<GroupCalendar> {
       backgroundColor: Colors.lightGreen,
       children: [
         SpeedDialChild(
-            child: const Icon(Icons.group, color: Colors.white),
-            label: "새 그룹 캘린더",
-            labelStyle: const TextStyle(
-                color: Colors.white, fontSize: 13.0, fontFamily: 'HancomMalangMalang', fontWeight: FontWeight.w100),
-            backgroundColor: Colors.green,
-            labelBackgroundColor: Colors.green,
-            onTap: () {
-              _showCreateGroupDialog(context);
-            }),
+          child: const Icon(Icons.group, color: Colors.white),
+          label: "새 그룹 캘린더",
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 13.0,
+            fontFamily: 'HancomMalangMalang',
+            fontWeight: FontWeight.w100,
+          ),
+          backgroundColor: Colors.green,
+          labelBackgroundColor: Colors.green,
+          onTap: () {
+            _showCreateGroupDialog(context);
+          },
+        ),
         SpeedDialChild(
-            child: const Icon(Icons.group_add, color: Colors.white),
-            label: "그룹 캘린더 참가",
-            labelStyle: const TextStyle(
-                color: Colors.white, fontSize: 13.0, fontFamily: 'HancomMalangMalang', fontWeight: FontWeight.w100),
-            backgroundColor: Colors.blue,
-            labelBackgroundColor: Colors.blue,
-            onTap: () {
-              _showJoinGroupDialog(context);
-            }),
+          child: const Icon(Icons.group_add, color: Colors.white),
+          label: "그룹 캘린더 참가",
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 13.0,
+            fontFamily: 'HancomMalangMalang',
+            fontWeight: FontWeight.w100,
+          ),
+          backgroundColor: Colors.blue,
+          labelBackgroundColor: Colors.blue,
+          onTap: () {
+            _showJoinGroupDialog(context);
+          },
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.delete, color: Colors.white),
+          label: "그룹 캘린더 삭제",
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 13.0,
+            fontFamily: 'HancomMalangMalang',
+            fontWeight: FontWeight.w100,
+          ),
+          backgroundColor: Colors.red,
+          labelBackgroundColor: Colors.red,
+          onTap: () {
+            _showDeleteGroupDialog(context);
+          },
+        ),
       ],
     );
   }
@@ -370,34 +458,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
       }
     } catch (e) {
       print('Join Group Exception: $e');
-      return false;
-    }
-  }
-
-  Future<bool> _deleteGroup(String pin) async {
-    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
-    try {
-      final response = await http.post(
-        Uri.parse(lambdaArn),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'function': 'deleteGroup',
-          'pin': pin,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-        print('Delete Group Response: $jsonResponse');
-        return jsonResponse['success'];
-      } else {
-        print('Delete Group Error: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Delete Group Exception: $e');
       return false;
     }
   }
