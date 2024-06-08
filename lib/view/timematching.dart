@@ -367,7 +367,9 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 child: Text('투표 현황 보기'),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await _confirmAppointment();
+                },
                 child: Text('약속 확정'),
               ),
             ],
@@ -448,8 +450,8 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
 
           for (var voter in voterData) {
             voters.add({
-              'id': voter['id'],
-              'name': voter['name'],
+              'id': voter['id']!,
+              'name': voter['name']!,
             });
           }
 
@@ -482,6 +484,54 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
           SnackBar(content: Text('투표에 실패했습니다. 다시 시도해 주세요.')),
         );
       }
+    }
+  }
+
+  Future<void> _confirmAppointment() async {
+    if (_selectedAppointment != null) {
+      String subject = _selectedAppointment!.subject;
+      DateTime start = _selectedAppointment!.startTime;
+      DateTime end = _selectedAppointment!.endTime;
+
+      // Fetch voters
+      List<Map<String, String>> voters = await _fetchVoters(subject, start, end);
+
+      // Confirm appointment for each voter
+      for (var voter in voters) {
+        String id = voter['id']!;
+        await _addToSchedule(id, subject, start, end);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('약속이 확정되었습니다.')),
+      );
+    }
+  }
+
+  Future<void> _addToSchedule(String id, String subject, DateTime start, DateTime end) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'insert',
+          'id': id,
+          'subject': subject,
+          'start': _formatDateTime(start),
+          'end': _formatDateTime(end),
+          'color': 'yellow', // or any other color you want to use
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to add to schedule');
+      }
+    } catch (e) {
+      print('Add to Schedule Exception: $e');
     }
   }
 
