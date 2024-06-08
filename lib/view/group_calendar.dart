@@ -207,7 +207,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     columns: const <DataColumn>[
                       DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
                       DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))), // 인원 수 열 추가
-                      DataColumn(label: Text('시간 매칭', style: TextStyle(fontSize: 16))), // 시간 매칭 열 추가
                     ],
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
@@ -232,9 +231,6 @@ class _GroupCalendarState extends State<GroupCalendar> {
                                 _showGroupMembersDialog(group['pin']);
                               },
                             ),
-                          ),
-                          DataCell(
-                            Icon(Icons.access_time, color: Colors.grey), // 시계 아이콘 추가
                           ),
                         ],
                       );
