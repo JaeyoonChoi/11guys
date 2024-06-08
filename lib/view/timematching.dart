@@ -19,6 +19,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
   bool _excludeNightTime = true;
   bool _viewByRatio = false;
   int _totalMembers = 0;
+  Appointment? _selectedAppointment;
 
   @override
   void initState() {
@@ -76,9 +77,9 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
         List<Appointment> overlappingIntervals = calculateOverlappingIntervals(appointments);
         _dataSource = AppointmentDataSource(overlappingIntervals);
 
-        // Fetch user appointments and add them to the list
-        List<Appointment> userAppointments = await fetchUserAppointments();
-        overlappingIntervals.addAll(userAppointments);
+        // Fetch group appointments and add them to the list
+        List<Appointment> groupAppointments = await fetchGroupAppointments();
+        overlappingIntervals.addAll(groupAppointments);
 
         return overlappingIntervals;
       } else {
@@ -89,7 +90,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
     }
   }
 
-  Future<List<Appointment>> fetchUserAppointments() async {
+  Future<List<Appointment>> fetchGroupAppointments() async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     final response = await http.post(
@@ -100,7 +101,6 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
       body: jsonEncode(<String, dynamic>{
         'function': 'get_timematching',
         'pin': widget.pin,
-        'user_id': widget.username,
       }),
     );
 
@@ -118,13 +118,13 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
             startTime: start,
             endTime: end,
             subject: interval['subject'],
-            color: Colors.lightGreen, // 연두색 블록
+            color: Colors.yellow, // 노란색 블록으로 변경
           ));
         }
 
         return appointments;
       } else {
-        throw Exception('Failed to load user appointments');
+        throw Exception('Failed to load group appointments');
       }
     } else {
       throw Exception('Failed to fetch data');
@@ -344,6 +344,64 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
         dateTime.minute.toString().padLeft(2, '0');
   }
 
+  Future<void> _showVoteDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('약속 투표'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () async {
+                  await _voteForAppointment();
+                  Navigator.of(context).pop();
+                },
+                child: Text('투표하기'),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text('투표 현황 보기'),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text('약속 확정'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _voteForAppointment() async {
+    if (_selectedAppointment != null) {
+      String subject = _selectedAppointment!.subject;
+      DateTime start = _selectedAppointment!.startTime;
+      DateTime end = _selectedAppointment!.endTime;
+
+      bool success = await _addTimematching(subject, start, end);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('투표가 성공적으로 완료되었습니다.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('투표에 실패했습니다. 다시 시도해 주세요.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -427,6 +485,15 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                   onTap: (details) {
                     if (details.targetElement == CalendarElement.calendarCell) {
                       _showAddAppointmentDialog(details.date!);
+                    }
+                  },
+                  onLongPress: (details) {
+                    if (details.targetElement == CalendarElement.appointment) {
+                      final appointment = details.appointments!.first;
+                      if (appointment.color == Colors.yellow) {
+                        _selectedAppointment = appointment;
+                        _showVoteDialog();
+                      }
                     }
                   },
                   appointmentBuilder: (context, details) {
