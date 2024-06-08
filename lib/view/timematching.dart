@@ -372,6 +372,13 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 },
                 child: Text('약속 확정'),
               ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  await _deleteAppointment();
+                  Navigator.of(context).pop();
+                },
+              ),
             ],
           ),
           actions: <Widget>[
@@ -508,6 +515,23 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
     }
   }
 
+  Future<void> _deleteAppointment() async {
+    if (_selectedAppointment != null) {
+      String subject = _selectedAppointment!.subject;
+      DateTime start = _selectedAppointment!.startTime;
+      DateTime end = _selectedAppointment!.endTime;
+
+      // Delete appointment for all voters
+      await _removeFromTimematching(widget.pin, subject, start, end);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('약속이 삭제되었습니다.')),
+      );
+
+      _refreshAppointments(); // Refresh the appointments
+    }
+  }
+
   Future<void> _addToSchedule(String id, String subject, DateTime start, DateTime end) async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
@@ -532,6 +556,32 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
       }
     } catch (e) {
       print('Add to Schedule Exception: $e');
+    }
+  }
+
+  Future<void> _removeFromTimematching(String pin, String subject, DateTime start, DateTime end) async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    try {
+      final response = await http.post(
+        Uri.parse(lambdaArn),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'function': 'delete_timematching',
+          'pin': pin,
+          'subject': subject,
+          'start': _formatDateTime(start),
+          'end': _formatDateTime(end),
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete from timematching');
+      }
+    } catch (e) {
+      print('Remove from Timematching Exception: $e');
     }
   }
 
@@ -623,7 +673,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                   onLongPress: (details) {
                     if (details.targetElement == CalendarElement.appointment) {
                       final appointment = details.appointments!.first;
-                      if (appointment.color == Colors.lightGreenAccent) {
+                      if (appointment.color == Colors.yellow) {
                         _selectedAppointment = appointment;
                         _showVoteDialog();
                       }
