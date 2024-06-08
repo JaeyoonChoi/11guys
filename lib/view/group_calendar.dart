@@ -189,10 +189,15 @@ class _GroupCalendarState extends State<GroupCalendar> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+       theme: ThemeData(
+         primarySwatch: Colors.blue,
+         fontFamily: 'HancomMalangMalang',
+       ),
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Text('그룹 캘린더'),
+          title: Text('그룹 캘린더',),
+          centerTitle: true,
         ),
         body: Container(
           color: Colors.white,
@@ -212,9 +217,9 @@ class _GroupCalendarState extends State<GroupCalendar> {
                     headingRowHeight: 56.0,
                     dataRowHeight: 64.0,
                     columns: const <DataColumn>[
-                      DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('인원 수', style: TextStyle(fontSize: 16))),
-                      DataColumn(label: Text('시간매칭', style: TextStyle(fontSize: 16))), // '시간매칭' 열 추가
+                      DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('시간매칭', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))), // '시간매칭' 열 추가
                     ],
                     rows: groups.map<DataRow>((group) {
                       return DataRow(
@@ -274,7 +279,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
       animatedIcon: AnimatedIcons.menu_close,
       visible: true,
       curve: Curves.bounceIn,
-      backgroundColor: Colors.lightGreen,
+      backgroundColor: Color(0xFFb2ddef),
       children: [
         SpeedDialChild(
           child: const Icon(Icons.group, color: Colors.white),

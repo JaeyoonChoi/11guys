@@ -31,6 +31,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         primaryColor: Colors.white, // 앱의 기본 색상 설정
+        fontFamily: 'HancomMalangMalang',
+        textTheme: TextTheme(
+
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          focusColor: Colors.black,
+          hoverColor: Colors.black,
+        )
         // floatingActionButtonTheme: Colors.white,
         // bottomNavigationBarTheme: Colors.white,
       ),
@@ -155,16 +163,28 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // 로고 건들기
       appBar: AppBar(
         backgroundColor: Colors.white,
+        // centerTitle: true,
         flexibleSpace: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset('images/magu.png', height: 150,),
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: _refreshAppointments,  // 새로고침 버튼 눌렀을 때 일정 새로고침
+            Padding(
+              padding: EdgeInsets.only(left: 16.0), // 왼쪽에 약간의 패딩 추가
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Image.asset('assets/images/magu_logo.png', height: 40),
+                  // Image.asset('assets/images/magu_logo.png', height: 30),
+                  Image.asset('assets/images/magu_text.png', height: 30, color:Colors.grey),
+                ],
+              )             // Image.asset('images/magu.png', height: 150,),
             ),
+            IconButton(
+        icon: Icon(Icons.refresh),
+        onPressed: _refreshAppointments,  // 새로고침 버튼 눌렀을 때 일정 새로고침
+      ),
           ],
         ),
       ),
@@ -174,13 +194,14 @@ class MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor : Colors.white,
+        selectedItemColor: Colors.black,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Month',  // 월간 뷰
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.all_inclusive, color: Colors.green,),
+            icon: Icon(Icons.all_inclusive, color: Color(0xFFb2ddef),),
             label: 'TimeMatching',  // 타임 매칭
           ),
           BottomNavigationBarItem(
