@@ -194,13 +194,24 @@ class _GroupCalendarState extends State<GroupCalendar> {
          fontFamily: 'HancomMalangMalang',
        ),
       home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text('그룹 캘린더', style: TextStyle(color: Color(0xff2e74b5)),),
-          centerTitle: true,
+        backgroundColor: Color(0xFFF1F2F4),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60),  //Appbar의 높이 설정
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 45),
+            child: AppBar(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15), //모서리
+                // side: BorderSide(color: Colors.black),
+              ),
+              backgroundColor: Color(0xFFFFFFFF),
+              title: Text('그룹 캘린더', style: TextStyle(color: Colors.black),),
+              centerTitle: true,
+            )
+          )
         ),
         body: Container(
-          color: Colors.white,
+          color: Color(0xFFF1F2F4),
           child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -213,56 +224,70 @@ class _GroupCalendarState extends State<GroupCalendar> {
                   height: MediaQuery.of(context).size.height * 0.6,
                   child: groups.isEmpty
                       ? Text('그룹이 없습니다')
-                      : DataTable(
-                    headingRowHeight: 56.0,
-                    dataRowHeight: 64.0,
-                    columns: const <DataColumn>[
-                      DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text('시간매칭', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))), // '시간매칭' 열 추가
-                    ],
-                    rows: groups.map<DataRow>((group) {
-                      return DataRow(
-                        cells: <DataCell>[
-                          DataCell(
-                            Text(group['club_name'], style: TextStyle(fontSize: 14)),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GroupDetailedPage(
-                                    pin: group['pin'],
+                      : Container(
+                      width: 500,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+
+                        shadowColor: null,
+                        color: Colors.white,
+                        elevation: 0, // 그림자 깊이
+                        child: DataTable(
+                          headingRowHeight: 56.0,
+                          dataRowHeight: 64.0,
+                          columns: const <DataColumn>[
+                            DataColumn(label: Text('그룹명', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('인원수', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('시간매칭', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))), // '시간매칭' 열 추가
+                          ],
+                          rows: groups.map<DataRow>((group) {
+                            return DataRow(
+                              cells: <DataCell>[
+                                DataCell(
+                                  Text(group['club_name'], style: TextStyle(fontSize: 14)),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => GroupDetailedPage(
+                                          pin: group['pin'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                DataCell(
+                                  GestureDetector(
+                                    child: Text(group['members_count'].toString(), style: TextStyle(fontSize: 14)), // 인원 수 표시
+                                    onTap: () {
+                                      _showGroupMembersDialog(group['pin']);
+                                    },
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          DataCell(
-                            GestureDetector(
-                              child: Text(group['members_count'].toString(), style: TextStyle(fontSize: 14)), // 인원 수 표시
-                              onTap: () {
-                                _showGroupMembersDialog(group['pin']);
-                              },
-                            ),
-                          ),
-                          DataCell(
-                            Icon(Icons.access_time, color: Colors.grey), // 시계 모양의 아이콘 추가
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TimeMatchingPage(
-                                    pin: group['pin'],
-                                    username: widget.username,  // 추가된 부분
-                                  ),
+                                DataCell(
+                                  Icon(Icons.access_time, color: Colors.grey), // 시계 모양의 아이콘 추가
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TimeMatchingPage(
+                                          pin: group['pin'],
+                                          username: widget.username,  // 추가된 부분
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                  )
+
+
                 ),
               ),
             ),

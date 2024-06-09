@@ -165,7 +165,7 @@ class MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       // 로고 건들기
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF1F2F4),
         // centerTitle: true,
         flexibleSpace: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,10 +173,11 @@ class MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: EdgeInsets.only(left: 16.0), // 왼쪽에 약간의 패딩 추가
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   // Image.asset('assets/images/magu_logo.png', height: 40),
                   // Image.asset('assets/images/magu_logo.png', height: 30),
+                  SizedBox(height: 0),  // 로고 위치 때문에
                   Image.asset(
                       'assets/images/magu_text.png',
                       height: 30,
