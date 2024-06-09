@@ -22,6 +22,7 @@ class WeekScreen extends StatelessWidget {
             headerStyle: CalendarHeaderStyle(
               backgroundColor: Colors.white,  // 배경 색 수정(white)
             ),
+            todayHighlightColor: Color(0xff203862),
             showNavigationArrow: true,
             dataSource: dataSource,
             // Drag & Drop

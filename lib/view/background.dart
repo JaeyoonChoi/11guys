@@ -177,7 +177,11 @@ class MyHomePageState extends State<MyHomePage> {
                 children: [
                   // Image.asset('assets/images/magu_logo.png', height: 40),
                   // Image.asset('assets/images/magu_logo.png', height: 30),
-                  Image.asset('assets/images/magu_text.png', height: 30, color:Colors.grey),
+                  Image.asset(
+                      'assets/images/magu_text.png',
+                      height: 30,
+                      // color:Colors.grey,
+                  ),
                 ],
               )             // Image.asset('images/magu.png', height: 150,),
             ),

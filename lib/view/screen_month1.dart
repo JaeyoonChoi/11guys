@@ -26,6 +26,7 @@ class MonthScreen extends StatelessWidget {
             headerStyle:CalendarHeaderStyle(
               backgroundColor: Colors.white,  // 배경 색 수정(white)
             ),
+            todayHighlightColor: Color(0xff203862),
             monthViewSettings: MonthViewSettings(
               showTrailingAndLeadingDates: false,
               // navigationDirection: MonthNavigationDirection.horizontal,   // 슬라이드 가로

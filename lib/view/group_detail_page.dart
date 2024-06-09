@@ -36,6 +36,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
       body: jsonEncode(<String, dynamic>{
         'function': 'getGroupSchedule',
         'pin': widget.pin,
+
       }),
     );
 
@@ -197,7 +198,9 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('그룹 상세 정보'),
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text('단체 캘린더'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -207,7 +210,9 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Container(
+        color: Colors.white,
+        child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -217,6 +222,11 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
                 Row(
                   children: [
                     Checkbox(
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      activeColor: Color(0xff203863),
                       value: _excludeNightTime,
                       onChanged: (bool? value) {
                         setState(() {
@@ -230,6 +240,11 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
                 Row(
                   children: [
                     Checkbox(
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      activeColor: Color(0xff203863),
                       value: _viewByRatio,
                       onChanged: (bool? value) {
                         setState(() {
@@ -258,6 +273,10 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
 
                 return SfCalendar(
                   view: CalendarView.week,
+                  backgroundColor: Colors.white24,
+                  todayHighlightColor: Color(0xff203863),
+                  headerStyle: CalendarHeaderStyle(backgroundColor: Colors.white,),
+                  // todayHighlightColor: Colors.black,
                   dataSource: _dataSource,
                   timeSlotViewSettings: TimeSlotViewSettings(
                     timeInterval: Duration(minutes: 30),
@@ -288,6 +307,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

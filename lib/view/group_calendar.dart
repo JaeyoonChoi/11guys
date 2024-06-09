@@ -196,7 +196,7 @@ class _GroupCalendarState extends State<GroupCalendar> {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Text('그룹 캘린더',),
+          title: Text('그룹 캘린더', style: TextStyle(color: Color(0xff2e74b5)),),
           centerTitle: true,
         ),
         body: Container(
