@@ -198,7 +198,8 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // shape: RoundedRectangleBorder(borderRadius: 15),
+        backgroundColor: Color(0xFFF1F2F4),
         centerTitle: true,
         title: Text('단체 캘린더'),
         actions: [
@@ -273,7 +274,7 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
 
                 return SfCalendar(
                   view: CalendarView.week,
-                  backgroundColor: Color(0x83EEEEEE),
+                  backgroundColor: Colors.white,
                   todayHighlightColor: Color(0xff203864),
                   headerStyle: CalendarHeaderStyle(backgroundColor: Colors.white,),
                   // todayHighlightColor: Colors.black,

@@ -589,7 +589,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF1F2F4),
         title: Text('시간 매칭'),
         // centerTitle: true,
         actions: [
@@ -609,113 +609,120 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
       body: Container(
         color: Colors.white,
         child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Checkbox(
-                      shape:
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      activeColor: Color(0xff203863),
-                      value: _excludeNightTime,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _excludeNightTime = value!;
-                        });
-                      },
-                    ),
-                    Text('새벽시간 지우기'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Checkbox(
-                      shape:
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      activeColor: Color(0xff203863),
-                      value: _viewByRatio,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _viewByRatio = value!;
-                          _refreshAppointments(); // Recalculate appointments to update colors
-                        });
-                      },
-                    ),
-                    Text('비율로 보기'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder<List<Appointment>>(
-              future: appointments,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('겹치는 일정이 없습니다.'));
-                }
-
-                return SfCalendar(
-                  headerStyle: CalendarHeaderStyle(
-                    backgroundColor: Colors.white,
-                  ),
-                  todayHighlightColor: Color(0xFF203862),
-                  view: CalendarView.week,
-                  dataSource: _dataSource,
-                  timeSlotViewSettings: TimeSlotViewSettings(
-                    timeInterval: Duration(minutes: 30),
-                    timeIntervalHeight: 60,
-                    timeTextStyle: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                    ),
-                    startHour: _excludeNightTime ? 6 : 0,
-                    endHour: _excludeNightTime ? 24 : 24,
-                  ),
-                  onTap: (details) {
-                    if (details.targetElement == CalendarElement.calendarCell) {
-                      _showAddAppointmentDialog(details.date!);
-                    }
-                  },
-                  onLongPress: (details) {
-                    if (details.targetElement == CalendarElement.appointment) {
-                      final appointment = details.appointments!.first;
-                      if (appointment.color == Colors.yellow) {
-                        _selectedAppointment = appointment;
-                        _showVoteDialog();
-                      }
-                    }
-                  },
-                  appointmentBuilder: (context, details) {
-                    final appointment = details.appointments.first;
-                    return Container(
-                      alignment: Alignment.center,
-                      color: appointment.color,
-                      child: Text(
-                        appointment.subject,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        Checkbox(
+                          shape:
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          activeColor: Color(0xff203863),
+                          value: _excludeNightTime,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _excludeNightTime = value!;
+                            });
+                          },
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                        Text('새벽시간 지우기'),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          shape:
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          activeColor: Color(0xff203863),
+                          value: _viewByRatio,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _viewByRatio = value!;
+                              _refreshAppointments(); // Recalculate appointments to update colors
+                            });
+                          },
+                        ),
+                        Text('비율로 보기'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
+
+            Expanded(
+              child: FutureBuilder<List<Appointment>>(
+                future: appointments,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('겹치는 일정이 없습니다.'));
+                  }
+
+                  return SfCalendar(
+                    headerStyle: CalendarHeaderStyle(
+                      backgroundColor: Colors.white,
+                    ),
+                    todayHighlightColor: Color(0xFF203862),
+                    view: CalendarView.week,
+                    dataSource: _dataSource,
+                    timeSlotViewSettings: TimeSlotViewSettings(
+                      timeInterval: Duration(minutes: 30),
+                      timeIntervalHeight: 60,
+                      timeTextStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                      ),
+                      startHour: _excludeNightTime ? 6 : 0,
+                      endHour: _excludeNightTime ? 24 : 24,
+                    ),
+                    onTap: (details) {
+                      if (details.targetElement == CalendarElement.calendarCell) {
+                        _showAddAppointmentDialog(details.date!);
+                      }
+                    },
+                    onLongPress: (details) {
+                      if (details.targetElement == CalendarElement.appointment) {
+                        final appointment = details.appointments!.first;
+                        if (appointment.color == Colors.yellow) {
+                          _selectedAppointment = appointment;
+                          _showVoteDialog();
+                        }
+                      }
+                    },
+                    appointmentBuilder: (context, details) {
+                      final appointment = details.appointments.first;
+                      return Container(
+                        alignment: Alignment.center,
+                        color: appointment.color,
+                        child: Text(
+                          appointment.subject,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
         ],
       ),
       ),
