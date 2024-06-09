@@ -283,30 +283,30 @@ class _GroupCalendarState extends State<GroupCalendar> {
       children: [
         SpeedDialChild(
           child: const Icon(Icons.group, color: Colors.white),
-          label: "새 그룹 캘린더",
+          label: "새 그룹 생성",
           labelStyle: const TextStyle(
             color: Colors.white,
             fontSize: 13.0,
             fontFamily: 'HancomMalangMalang',
             fontWeight: FontWeight.w100,
           ),
-          backgroundColor: Colors.green,
-          labelBackgroundColor: Colors.green,
+          backgroundColor: Color(0xff696969),
+          labelBackgroundColor: Color(0xff696969),
           onTap: () {
             _showCreateGroupDialog(context);
           },
         ),
         SpeedDialChild(
           child: const Icon(Icons.group_add, color: Colors.white),
-          label: "그룹 캘린더 참가",
+          label: "그룹 참가",
           labelStyle: const TextStyle(
             color: Colors.white,
             fontSize: 13.0,
             fontFamily: 'HancomMalangMalang',
             fontWeight: FontWeight.w100,
           ),
-          backgroundColor: Colors.blue,
-          labelBackgroundColor: Colors.blue,
+          backgroundColor: Color(0xff696969),
+          labelBackgroundColor: Color(0xff696969),
           onTap: () {
             _showJoinGroupDialog(context);
           },
@@ -320,8 +320,8 @@ class _GroupCalendarState extends State<GroupCalendar> {
             fontFamily: 'HancomMalangMalang',
             fontWeight: FontWeight.w100,
           ),
-          backgroundColor: Colors.red,
-          labelBackgroundColor: Colors.red,
+          backgroundColor: Color(0xff696969),
+          labelBackgroundColor: Color(0xff696969),
           onTap: () {
             _showDeleteGroupDialog(context);
           },

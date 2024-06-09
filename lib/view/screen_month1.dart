@@ -16,6 +16,9 @@ class MonthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'HancomMalangMalang',
+      ),
       home: Scaffold(
         // appBar: AppBar(), //상
         body: Container(

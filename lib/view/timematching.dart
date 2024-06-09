@@ -589,21 +589,26 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text('시간 매칭'),
+        // centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _refreshAppointments,
-          ),
+          Text('PIN: ${widget.pin}'),
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
-              child: Text('PIN: ${widget.pin}'),
+              child: IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: _refreshAppointments,
+              ),
             ),
           ),
         ],
       ),
-      body: Column(
+      body: Container(
+        color: Colors.white,
+        child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -613,6 +618,11 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 Row(
                   children: [
                     Checkbox(
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      activeColor: Color(0xff203863),
                       value: _excludeNightTime,
                       onChanged: (bool? value) {
                         setState(() {
@@ -626,6 +636,11 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 Row(
                   children: [
                     Checkbox(
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      activeColor: Color(0xff203863),
                       value: _viewByRatio,
                       onChanged: (bool? value) {
                         setState(() {
@@ -653,6 +668,10 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
                 }
 
                 return SfCalendar(
+                  headerStyle: CalendarHeaderStyle(
+                    backgroundColor: Colors.white,
+                  ),
+                  todayHighlightColor: Color(0xFF203862),
                   view: CalendarView.week,
                   dataSource: _dataSource,
                   timeSlotViewSettings: TimeSlotViewSettings(
@@ -698,6 +717,7 @@ class _TimeMatchingPageState extends State<TimeMatchingPage> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

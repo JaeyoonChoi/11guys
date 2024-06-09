@@ -273,8 +273,8 @@ class _GroupDetailedPageState extends State<GroupDetailedPage> {
 
                 return SfCalendar(
                   view: CalendarView.week,
-                  backgroundColor: Colors.white24,
-                  todayHighlightColor: Color(0xff203863),
+                  backgroundColor: Color(0x83EEEEEE),
+                  todayHighlightColor: Color(0xff203864),
                   headerStyle: CalendarHeaderStyle(backgroundColor: Colors.white,),
                   // todayHighlightColor: Colors.black,
                   dataSource: _dataSource,

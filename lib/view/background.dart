@@ -225,20 +225,21 @@ class MyHomePageState extends State<MyHomePage> {
     soundRecorder.init();  // 음성 녹음기 초기화
 
     return SpeedDial(
-      animatedIcon: AnimatedIcons.menu_close,
+      animatedIcon: AnimatedIcons.add_event,
+      // animatedIconTheme: IconThemeData(color: Colors.white),
       visible: true,
       curve: Curves.bounceIn,
-      backgroundColor: Colors.lightBlue,
+      backgroundColor: Colors.white,
       children: [
         SpeedDialChild(
-            child: const Icon(Icons.mic, color: Colors.white),
+            child: const Icon(Icons.mic, color: Colors.black),
             label: "음성 자동 입력",
             labelStyle: const TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 13.0),
-            backgroundColor: Colors.blueAccent,
-            labelBackgroundColor: Colors.blueAccent,
+            backgroundColor: Color(0xffcbdce3),
+            labelBackgroundColor: Color(0xffcbdce3),
             onTap: () {
               showSpeechDialog();
             }
@@ -246,25 +247,25 @@ class MyHomePageState extends State<MyHomePage> {
         SpeedDialChild(
           child: const Icon(
             Icons.screenshot,
-            color: Colors.white,
+            color: Colors.black,
           ),
           label: "캡처 입력",
-          backgroundColor: Colors.blueAccent,
-          labelBackgroundColor: Colors.blueAccent,
+          backgroundColor: Color(0xffcbdce3),
+          labelBackgroundColor: Color(0xffcbdce3),
           labelStyle: const TextStyle(
-              fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
+              fontWeight: FontWeight.w500, color: Colors.black, fontSize: 13.0),
           onTap: () {},
         ),
         SpeedDialChild(
           child: const Icon(
             Icons.keyboard_alt_outlined,
-            color: Colors.white,
+            color: Colors.black,
           ),
           label: "직접 입력",
-          backgroundColor: Colors.blueAccent,
-          labelBackgroundColor: Colors.blueAccent,
+          backgroundColor: Color(0xffcbdce3),
+          labelBackgroundColor: Color(0xffcbdce3),
           labelStyle: const TextStyle(
-              fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
+              fontWeight: FontWeight.w500, color: Colors.black, fontSize: 13.0),
           onTap: () {
             showInsertDialog();  // 직접 입력 다이얼로그 호출
           },
