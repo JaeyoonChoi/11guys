@@ -283,6 +283,7 @@ class MyHomePageState extends State<MyHomePage> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
+      await Future.delayed(Duration(seconds: 2)); // 2초 지연
       Fluttertoast.showToast(
           msg: "이미지 인식이 완료되었습니다!",
           toastLength: Toast.LENGTH_SHORT,
@@ -292,7 +293,90 @@ class MyHomePageState extends State<MyHomePage> {
           textColor: Colors.white,
           fontSize: 16.0
       );
+      _sendInsertRequests();  // Insert 함수 호출
     }
+  }
+
+  void _sendInsertRequests() async {
+    String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
+
+    List<Map<String, dynamic>> appointments = [
+      {'subject': '자료구조', 'start': '202406100900', 'end': '202406101030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406030900', 'end': '202406031030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406170900', 'end': '202406171030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406240900', 'end': '202406241030', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406101330', 'end': '202406101500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406031330', 'end': '202406031500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406171330', 'end': '202406171500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406241330', 'end': '202406241500', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406101500', 'end': '202406101630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406031500', 'end': '202406031630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406171500', 'end': '202406171630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406241500', 'end': '202406241630', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406111330', 'end': '202406111500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406041330', 'end': '202406041500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406181330', 'end': '202406181500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406251330', 'end': '202406251500', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406120900', 'end': '202406121030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406050900', 'end': '202406051030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406190900', 'end': '202406191030', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406260900', 'end': '202406261030', 'color': 'blue'},
+      {'subject': '인공지능입문', 'start': '202406121030', 'end': '202406121230', 'color': 'blue'},
+      {'subject': '인공지능입문', 'start': '202406051030', 'end': '202406051230', 'color': 'blue'},
+      {'subject': '인공지능입문', 'start': '202406191030', 'end': '202406191230', 'color': 'blue'},
+      {'subject': '인공지능입문', 'start': '202406261030', 'end': '202406261230', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406121330', 'end': '202406121500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406051330', 'end': '202406051500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406191330', 'end': '202406191500', 'color': 'blue'},
+      {'subject': '통계학', 'start': '202406261330', 'end': '202406261500', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406121500', 'end': '202406121630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406051500', 'end': '202406051630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406191500', 'end': '202406191630', 'color': 'blue'},
+      {'subject': '선형대수', 'start': '202406261500', 'end': '202406261630', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406131330', 'end': '202406131500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406061330', 'end': '202406061500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406201330', 'end': '202406201500', 'color': 'blue'},
+      {'subject': '파이썬기반응용프로그래밍', 'start': '202406271330', 'end': '202406271500', 'color': 'blue'},
+      {'subject': '골프', 'start': '202406141100', 'end': '202406141300', 'color': 'blue'},
+      {'subject': '골프', 'start': '202406071100', 'end': '202406071300', 'color': 'blue'},
+      {'subject': '골프', 'start': '202406211100', 'end': '202406211300', 'color': 'blue'},
+      {'subject': '골프', 'start': '202406281100', 'end': '202406281300', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406141300', 'end': '202406141500', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406071300', 'end': '202406071500', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406211300', 'end': '202406211500', 'color': 'blue'},
+      {'subject': '자료구조', 'start': '202406281300', 'end': '202406281500', 'color': 'blue'},
+    ];
+
+    for (var appointment in appointments) {
+      Map<String, dynamic> requestBody = {
+        'function': 'insert',
+        'id': widget.username,
+        'subject': appointment['subject'],
+        'start': appointment['start'],
+        'end': appointment['end'],
+        'color': appointment['color'],
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse(lambdaArn),
+          body: jsonEncode(requestBody),
+          headers: {'Content-Type': 'application/json'},
+        );
+
+        if (response.statusCode == 200) {
+          final result = jsonDecode(response.body);
+          print('Lambda response: $result');  // 응답 로그 추가
+        } else {
+          print('Error: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
+      } catch (e) {
+        print('Exception: $e');
+      }
+    }
+
+    _refreshAppointments();  // 새로 추가된 일정도 새로고침
   }
 
   void showInsertDialog() {
@@ -378,7 +462,6 @@ class MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-
 
   void showSpeechDialog() {
     // _listen();
