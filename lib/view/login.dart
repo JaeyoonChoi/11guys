@@ -4,6 +4,53 @@ import 'package:calendar_final/view/group_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:calendar_final/view/background.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+int templateId = 108823;
+
+FeedTemplate _getTemplate() {
+  String link = 'https://developers.kakao.com';
+  return FeedTemplate(
+    content: Content(
+      title: 'test title',
+      description: 'test description',
+      imageUrl: Uri.parse('https://example.com/image.png'),
+      link: Link(webUrl: Uri.parse(link), mobileWebUrl: Uri.parse(link)),
+    ),
+    buttons: [
+      Button(
+        title: 'button title',
+        link: Link(
+          webUrl: Uri.parse(link),
+          mobileWebUrl: Uri.parse(link),
+        ),
+      ),
+    ],
+  );
+}
+
+Future<void> shareKakaoTalk() async {
+  bool isKakaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
+
+  if (isKakaoTalkSharingAvailable) {
+    try {
+      Uri uri = await ShareClient.instance.shareCustom(templateId: templateId);
+      await ShareClient.instance.launchKakaoTalk(uri);
+      print('카카오톡 공유 완료');
+    } catch (error) {
+      print('카카오톡 공유 실패 $error');
+    }
+  } else {
+    try {
+      Uri shareUrl = await WebSharerClient.instance.makeCustomUrl(
+          templateId: templateId, templateArgs: {'key1': 'value1'});
+      await launch(shareUrl.toString());
+    } catch (error) {
+      print('카카오톡 공유 실패 $error');
+    }
+  }
+}
 
 class LoginApp extends StatelessWidget {
   @override
@@ -21,7 +68,6 @@ class LoginApp extends StatelessWidget {
       routes: {
         '/timematching': (context) => GroupCalendar(username: '사용자명'),
         '/detail': (context) => GroupDetailedPage(pin: ''),  // '/' 경로에 HomePage 위젯을 연결합니다.
-        // '/timematching': (context) => GroupCalendar(username: '사용자명',),
       },
       onGenerateRoute: (settings) {
         // 동적 경로를 처리하기 위한 설정
@@ -112,99 +158,107 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-// 디자인
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFb2ddef),
-        elevation: 0,  // AppBar의 그림자 제거
+        elevation: 0, // AppBar의 그림자 제거
+        actions: [ // 추가된 부분 시작
+          IconButton(
+            // icon: Image.asset('assets/images/share.png',
+            //     width: 20,
+            //     height: 20
+            // ),
+              icon: Icon(Icons.share),
+            iconSize: 24,
+            onPressed: shareKakaoTalk,
+          ),
+        ], // 추가된 부분 끝
       ),
       body: SingleChildScrollView(
         child: Container(
-        color: Color(0xFFb2ddef),
-        child: Align(
-          alignment: Alignment.topCenter, //
-          child: Padding(
-            padding: EdgeInsets.only(top: 40.0),  // 상단 여백 추가
-            child: Column(// 로고
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Image.asset(
-                'assets/images/magu_main_logo.png',
-                width: 200,
-                height:200,
+          color: Color(0xFFb2ddef),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: EdgeInsets.only(top: 40.0), // 상단 여백 추가
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/magu_main_logo.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                  SizedBox(height: 0), // 로고와 로그인 폼 사이 간격
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            labelText: '학번',
+                            labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                            ),
+                          ),
+                          style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                        ),
+                        SizedBox(height: 20.0),
+                        TextField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: '비밀번호',
+                            labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                        ),
+                        SizedBox(height: 20.0),
+                        ElevatedButton(
+                          onPressed: _handleLogin,
+                          child: Text('로그인'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
+                            foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        TextButton(
+                          onPressed: _goToSignUp,
+                          child: Text('회원가입'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.black, // 버튼 텍스트 색 설정
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 500),
+                ],
               ),
-              SizedBox(height: 0),  // 로고와 로그인 폼 사이 간격
-
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                // height: 0,
-                padding: EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: '학번',
-                        labelStyle: TextStyle(color: Colors.black), // 글자색 설정
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
-                        ),
-                      ),
-                      style: TextStyle(color: Colors.black), // 입력 글자색 설정
-                    ),
-                    SizedBox(height: 20.0),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: '비밀번호',
-                        labelStyle: TextStyle(color: Colors.black), // 글자색 설정
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
-                        ),
-                      ),
-                      obscureText: true,
-                      style: TextStyle(color: Colors.black), // 입력 글자색 설정
-                    ),
-                    SizedBox(height: 20.0),
-                    ElevatedButton(
-                      onPressed: _handleLogin,
-                      child: Text('로그인'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFb2ddef), // 버튼 배경색 설정
-                        foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
-                      ),
-                    ),
-                    SizedBox(height: 10.0),
-                    TextButton(
-                      onPressed: _goToSignUp,
-                      child: Text('회원가입'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.black, // 버튼 텍스트 색 설정
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 500),
-            ]
-          ),
+            ),
           ),
         ),
-      ),
       ),
     );
   }

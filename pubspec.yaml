@@ -34,10 +34,14 @@ dependencies:
   intl: ^0.19.0
   syncfusion_flutter_calendar: ^25.2.5
   flutter_speed_dial: ^7.0.0
+  kakao_flutter_sdk: ^1.9.2 # 전체 추가
+  kakao_flutter_sdk_user: ^1.9.2 # 카카오 로그인 API 패키지
+  kakao_flutter_sdk_share: ^1.9.2 # 카카오톡 공유 API 패키지
+  kakao_flutter_sdk_talk: ^1.9.2 # 카카오톡 채널, 카카오톡 소셜, 카카오톡 메시지 API 패키지
 
 
   # 백엔드 연결
-#  aws_s3_plugin: ^0.3.0
+  #  aws_s3_plugin: ^0.3.0
   path_provider: ^2.0.11
   flutter_sound: ^9.4.11
   http: ^1.2.1
@@ -74,12 +78,12 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/images/magu_main_logo.png
-     - assets/images/magu_logo.png
-     - assets/images/magu_text.png
-     # 사진 가져오기
-     - images/logo.png
-     - images/magu.png
+    - assets/images/magu_main_logo.png
+    - assets/images/magu_logo.png
+    - assets/images/magu_text.png
+    # 사진 가져오기
+    - images/logo.png
+    - images/magu.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -98,8 +102,8 @@ flutter:
       fonts:
         - asset: assets/fonts/HancomMalangMalang-Bold.otf
         - asset: assets/fonts/HancomMalangMalang-Regular.otf
-#    - asset: assets/fonts/HancomMalangMalang-Bold.ttf
-#    - asset: assets/fonts/HancomMAlangMalang-Bold.otf
+  #    - asset: assets/fonts/HancomMalangMalang-Bold.ttf
+  #    - asset: assets/fonts/HancomMAlangMalang-Bold.otf
 
   #   - family: Schyler
   #     fonts:
