@@ -39,6 +39,9 @@ dependencies:
   kakao_flutter_sdk_share: ^1.9.2 # 카카오톡 공유 API 패키지
   kakao_flutter_sdk_talk: ^1.9.2 # 카카오톡 채널, 카카오톡 소셜, 카카오톡 메시지 API 패키지
 
+  image_picker: ^0.8.4+4
+  fluttertoast: ^8.0.8
+
 
   # 백엔드 연결
   #  aws_s3_plugin: ^0.3.0

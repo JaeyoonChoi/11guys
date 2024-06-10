@@ -11,10 +11,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
 import 'dart:math';
+import 'package:image_picker/image_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:intl/intl.dart';
-
 
 class MyApp extends StatelessWidget {
   final String username;
@@ -30,15 +31,15 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Colors.white, // 앱의 기본 색상 설정
-        fontFamily: 'HancomMalangMalang',
-        textTheme: TextTheme(
+          primaryColor: Colors.white, // 앱의 기본 색상 설정
+          fontFamily: 'HancomMalangMalang',
+          textTheme: TextTheme(
 
-        ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          focusColor: Colors.black,
-          hoverColor: Colors.black,
-        )
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            focusColor: Colors.black,
+            hoverColor: Colors.black,
+          )
         // floatingActionButtonTheme: Colors.white,
         // bottomNavigationBarTheme: Colors.white,
       ),
@@ -171,25 +172,25 @@ class MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: EdgeInsets.only(left: 16.0), // 왼쪽에 약간의 패딩 추가
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // Image.asset('assets/images/magu_logo.png', height: 40),
-                  // Image.asset('assets/images/magu_logo.png', height: 30),
-                  SizedBox(height: 0),  // 로고 위치 때문에
-                  Image.asset(
+                padding: EdgeInsets.only(left: 16.0), // 왼쪽에 약간의 패딩 추가
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Image.asset('assets/images/magu_logo.png', height: 40),
+                    // Image.asset('assets/images/magu_logo.png', height: 30),
+                    SizedBox(height: 0),  // 로고 위치 때문에
+                    Image.asset(
                       'assets/images/magu_text.png',
                       height: 30,
                       // color:Colors.grey,
-                  ),
-                ],
-              )             // Image.asset('images/magu.png', height: 150,),
+                    ),
+                  ],
+                )             // Image.asset('images/magu.png', height: 150,),
             ),
             IconButton(
-        icon: Icon(Icons.refresh),
-        onPressed: _refreshAppointments,  // 새로고침 버튼 눌렀을 때 일정 새로고침
-      ),
+              icon: Icon(Icons.refresh),
+              onPressed: _refreshAppointments,  // 새로고침 버튼 눌렀을 때 일정 새로고침
+            ),
           ],
         ),
       ),
@@ -255,7 +256,9 @@ class MyHomePageState extends State<MyHomePage> {
           labelBackgroundColor: Color(0xffcbdce3),
           labelStyle: const TextStyle(
               fontWeight: FontWeight.w500, color: Colors.black, fontSize: 13.0),
-          onTap: () {},
+          onTap: () {
+            _pickImage();
+          },
         ),
         SpeedDialChild(
           child: const Icon(
@@ -273,6 +276,23 @@ class MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+  }
+
+  void _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      Fluttertoast.showToast(
+          msg: "이미지 인식이 완료되었습니다!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+    }
   }
 
   void showInsertDialog() {
@@ -383,7 +403,7 @@ class MyHomePageState extends State<MyHomePage> {
                     // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
                   },
                 ),
-                
+
                 // IconButton(
                 //   // icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
                 //   icon: Icon(Icons.refresh),  // test
@@ -393,13 +413,13 @@ class MyHomePageState extends State<MyHomePage> {
                 //     // refresh
                 //   },
                 // ),
-                
+
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
                     // todo
                     // 데이터 전송
-                    
+
                     Navigator.of(context).pop();  // 다이얼로그 닫기
                   },
                 ),
