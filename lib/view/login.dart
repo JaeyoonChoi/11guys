@@ -151,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // 회원가입 창
   void _goToSignUp() {
     Navigator.push(
       context,
@@ -268,7 +269,7 @@ class SignUpPage extends StatelessWidget {
   TextEditingController _newUsernameController = TextEditingController();
   TextEditingController _newPasswordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
+  // TextEditingController _emailController = TextEditingController();
 
   Future<bool> _sendRequest(Map<String, dynamic> requestBody) async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
@@ -358,21 +359,21 @@ class SignUpPage extends StatelessWidget {
                   style: TextStyle(color: Colors.black), // 입력 글자색 설정
                 ),
                 SizedBox(height: 20.0),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.black), // 글자색 설정
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.black), // 입력 글자색 설정
-                ),
-                SizedBox(height: 20.0),
+                // TextField(
+                //   controller: _emailController,
+                //   decoration: InputDecoration(
+                //     labelText: 'Email',
+                //     labelStyle: TextStyle(color: Colors.black), // 글자색 설정
+                //     enabledBorder: UnderlineInputBorder(
+                //       borderSide: BorderSide(color: Color(0xFFb2ddef)), // 밑줄 색깔 설정
+                //     ),
+                //     focusedBorder: UnderlineInputBorder(
+                //       borderSide: BorderSide(color: Color(0xFFb2ddef)), // 포커스 시 밑줄 색깔 설정
+                //     ),
+                //   ),
+                //   style: TextStyle(color: Colors.black), // 입력 글자색 설정
+                // ),
+                // SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: _signUp,
                   child: Text('회원가입'),
@@ -389,6 +390,10 @@ class SignUpPage extends StatelessWidget {
     );
   }
 }
+
+
+
+// 람다 연결
 
 class HomePage extends StatelessWidget {
   @override
