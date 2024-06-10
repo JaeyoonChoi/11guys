@@ -369,7 +369,8 @@ class MyHomePageState extends State<MyHomePage> {
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
               title: Text("마이크를 누르고 말 하세요"),
-              content: Text(_text), //인식된 텍스트를 다이얼로그에 표시
+              // content: Text(_text), //인식된 텍스트를 다이얼로그에 표시
+              content: Text(_extractDateTime(_text) ?? 'No'),
               actions: [
                 IconButton(
                   icon: Icon(_isListening ? Icons.stop : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
@@ -377,6 +378,8 @@ class MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     _listen(); // 음성 인식 시작/중지
                     setState(() {});  // 상태 업데이트
+                    // print('($formattedText)');
+                    String? extractedText = _extractDateTime(_text);
                     // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
                   },
                 ),
@@ -431,7 +434,7 @@ class MyHomePageState extends State<MyHomePage> {
       _speechToText.stop();
     }
   }
-  void _extractDateTime(String text) {
+  String? _extractDateTime(String text) {
     RegExp exp = RegExp(r'(\d{1,2})월\s(\d{1,2})일\s(\d{1,2})시\s(\d{2})분\s(.*)');
     var matches = exp.firstMatch(text);
     if (matches != null) {
@@ -442,9 +445,13 @@ class MyHomePageState extends State<MyHomePage> {
       var minute = matches.group(4)!.padLeft(2, '0');
       var description = matches.group(5);
 
-      var dateTime = '$year$month${day}T$hour$minute';
+      var dateTime = '$year$month${day}$hour$minute';
+      var formattedText = '($dateTime, $description)';
       print('Extracted: ($dateTime, $description)');
+
+      return formattedText;
     }
+    return null;
   }
 
 
