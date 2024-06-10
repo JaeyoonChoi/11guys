@@ -13,7 +13,6 @@ import 'package:calendar_final/provider/appointment_control.dart';
 import 'dart:math';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:intl/intl.dart';
 
@@ -33,15 +32,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primaryColor: Colors.white, // 앱의 기본 색상 설정
           fontFamily: 'HancomMalangMalang',
-          textTheme: TextTheme(
-
-          ),
+          textTheme: TextTheme(),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
             focusColor: Colors.black,
             hoverColor: Colors.black,
           )
-        // floatingActionButtonTheme: Colors.white,
-        // bottomNavigationBarTheme: Colors.white,
       ),
       home: MyHomePage(username: username),
     );
@@ -62,7 +57,6 @@ class MyHomePageState extends State<MyHomePage> {
   List<Appointment> _appointments = [];
   late List<Widget> _pages;
   late AppointmentDataSource _dataSource;
-  // 음성 인식 관련 변수 선언
   stt.SpeechToText _speechToText = stt.SpeechToText();
   bool _isListening = false;
   String _text = '말 하세요';
@@ -107,15 +101,20 @@ class MyHomePageState extends State<MyHomePage> {
         if (result['success'] == true) {
           List<dynamic> appointmentsJson = result['appointments'];
           List<Appointment> newAppointments = appointmentsJson.map((json) {
-            return Appointment(
-              startTime: parseCustomDateTime(json['start']),  // 시작 시간 파싱
-              endTime: parseCustomDateTime(json['end']),  // 종료 시간 파싱
-              subject: json['subject'],
-              color: _getRandomColor(),  // 랜덤 색상 설정
-              startTimeZone: '',
-              endTimeZone: '',
-            );
-          }).toList();
+            try {
+              return Appointment(
+                startTime: parseCustomDateTime(json['start']),  // 시작 시간 파싱
+                endTime: parseCustomDateTime(json['end']),  // 종료 시간 파싱
+                subject: json['subject'],
+                color: _getRandomColor(),  // 랜덤 색상 설정
+                startTimeZone: '',
+                endTimeZone: '',
+              );
+            } catch (e) {
+              print('Failed to parse appointment: $json');
+              return null;
+            }
+          }).where((appointment) => appointment != null).cast<Appointment>().toList();
 
           setState(() {
             _appointments = newAppointments;
@@ -157,6 +156,7 @@ class MyHomePageState extends State<MyHomePage> {
       int minute = int.parse(dateTimeString.substring(10, 12));
       return DateTime(year, month, day, hour, minute);
     } catch (e) {
+      print('Error parsing date: $dateTimeString');
       throw FormatException('Invalid date format: $dateTimeString');
     }
   }
@@ -164,10 +164,8 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 로고 건들기
       appBar: AppBar(
         backgroundColor: Color(0xFFF1F2F4),
-        // centerTitle: true,
         flexibleSpace: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -176,16 +174,13 @@ class MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    // Image.asset('assets/images/magu_logo.png', height: 40),
-                    // Image.asset('assets/images/magu_logo.png', height: 30),
                     SizedBox(height: 0),  // 로고 위치 때문에
                     Image.asset(
                       'assets/images/magu_text.png',
                       height: 30,
-                      // color:Colors.grey,
                     ),
                   ],
-                )             // Image.asset('images/magu.png', height: 150,),
+                )
             ),
             IconButton(
               icon: Icon(Icons.refresh),
@@ -228,7 +223,6 @@ class MyHomePageState extends State<MyHomePage> {
 
     return SpeedDial(
       animatedIcon: AnimatedIcons.add_event,
-      // animatedIconTheme: IconThemeData(color: Colors.white),
       visible: true,
       curve: Curves.bounceIn,
       backgroundColor: Colors.white,
@@ -464,7 +458,6 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void showSpeechDialog() {
-    // _listen();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -472,37 +465,26 @@ class MyHomePageState extends State<MyHomePage> {
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
               title: Text("마이크를 누르고 말 하세요"),
-              // content: Text(_text), //인식된 텍스트를 다이얼로그에 표시
-              content: Text(_extractDateTime(_text) ?? 'No'),
+              content: Text(_text), // 인식된 텍스트를 다이얼로그에 표시
               actions: [
                 IconButton(
-                  icon: Icon(_isListening ? Icons.stop : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
-                  // icon: Icon(Icons.mic),  // test
+                  icon: Icon(_isListening ? Icons.stop : Icons.mic_none),  // 음성 인식 상태에 따라 아이콘 변경
                   onPressed: () {
                     _listen(); // 음성 인식 시작/중지
                     setState(() {});  // 상태 업데이트
-                    // print('($formattedText)');
-                    String? extractedText = _extractDateTime(_text);
-                    // if (!_isListening) Navigator.of(context).pop(); // 음성 인식이 중지되면 다이얼로그 닫기
                   },
                 ),
-
-                // IconButton(
-                //   // icon: Icon(_isListening ? Icons.mic_off : Icons.mic_none),  //음성 인식 상태에 따라 아이콘 변경
-                //   icon: Icon(Icons.refresh),  // test
-                //   onPressed: () {
-                //     _listen();
-                //     // todo
-                //     // refresh
-                //   },
-                // ),
-
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    // todo
-                    // 데이터 전송
-
+                    String? extractedText = _extractDateTime(_text);
+                    if (extractedText != null) {
+                      var parts = extractedText.split(', ');
+                      var start = parts[0];
+                      var subject = parts[1];
+                      var end = addOneHour(start);
+                      _insertSchedule(subject, start, end);
+                    }
                     Navigator.of(context).pop();  // 다이얼로그 닫기
                   },
                 ),
@@ -513,7 +495,7 @@ class MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-// 음성 인식 관련 함수들
+
   void _listen() async {
     if (!_isListening) {
       bool available = await _speechToText.initialize(
@@ -528,7 +510,6 @@ class MyHomePageState extends State<MyHomePage> {
               _text = val.recognizedWords;
               _confidence = val.hasConfidenceRating ? val.confidence : 1.0;
             });
-            _extractDateTime(_text);
           },
         );
       }
@@ -537,6 +518,7 @@ class MyHomePageState extends State<MyHomePage> {
       _speechToText.stop();
     }
   }
+
   String? _extractDateTime(String text) {
     RegExp exp = RegExp(r'(\d{1,2})월\s(\d{1,2})일\s(\d{1,2})시\s(\d{2})분\s(.*)');
     var matches = exp.firstMatch(text);
@@ -549,14 +531,29 @@ class MyHomePageState extends State<MyHomePage> {
       var description = matches.group(5);
 
       var dateTime = '$year$month${day}$hour$minute';
-      var formattedText = '($dateTime, $description)';
-      print('Extracted: ($dateTime, $description)');
+      var formattedText = '$dateTime, $description';
+      print('Extracted: $formattedText');
 
       return formattedText;
     }
     return null;
   }
 
+  String addOneHour(String startDateTime) {
+    try {
+      int year = int.parse(startDateTime.substring(0, 4));
+      int month = int.parse(startDateTime.substring(4, 6));
+      int day = int.parse(startDateTime.substring(6, 8));
+      int hour = int.parse(startDateTime.substring(8, 10));
+      int minute = int.parse(startDateTime.substring(10, 12));
+      DateTime start = DateTime(year, month, day, hour, minute);
+      DateTime end = start.add(Duration(hours: 1));
+      return DateFormat('yyyyMMddHHmm').format(end);
+    } catch (e) {
+      print('Error adding one hour to date: $startDateTime');
+      throw FormatException('Invalid date format: $startDateTime');
+    }
+  }
 
   String formatDateTime(DateTime date, TimeOfDay time) {
     final formattedDate = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
@@ -564,17 +561,16 @@ class MyHomePageState extends State<MyHomePage> {
     return formattedDate + formattedTime;
   }
 
-  // 일정 데이터 입력/전송
   void _insertSchedule(String subject, String startDateTime, String endDateTime) async {
     String lambdaArn = 'https://2ylpznm6rb.execute-api.ap-northeast-2.amazonaws.com/default/master';
 
     Map<String, dynamic> requestBody = {
-      'function': 'addAppointment',
-      'user_id': widget.username,
+      'function': 'insert',
+      'id': widget.username,
       'subject': subject,
       'start': startDateTime,
       'end': endDateTime,
-      'color': 'blue',
+      'color': 'green',
     };
 
     try {
