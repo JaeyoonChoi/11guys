@@ -10,7 +10,6 @@ import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:calendar_final/provider/appointment_control.dart';
-import 'dart:math';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -106,7 +105,7 @@ class MyHomePageState extends State<MyHomePage> {
                 startTime: parseCustomDateTime(json['start']),  // 시작 시간 파싱
                 endTime: parseCustomDateTime(json['end']),  // 종료 시간 파싱
                 subject: json['subject'],
-                color: _getRandomColor(),  // 랜덤 색상 설정
+                color: Color(0xFF87CEEB),  // 하늘색으로 고정
                 startTimeZone: '',
                 endTimeZone: '',
               );
@@ -138,13 +137,8 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Color _getRandomColor() {
-    final random = Random();
-    return Color.fromARGB(
-      255,
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
-    );
+    // 이 함수는 더 이상 필요하지 않으므로 비워둡니다.
+    return Color(0xFF87CEEB); // 기본 색상을 하늘색으로 고정
   }
 
   DateTime parseCustomDateTime(String dateTimeString) {
@@ -570,7 +564,7 @@ class MyHomePageState extends State<MyHomePage> {
       'subject': subject,
       'start': startDateTime,
       'end': endDateTime,
-      'color': 'green',
+      'color': 'skyblue',
     };
 
     try {

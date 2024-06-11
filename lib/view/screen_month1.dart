@@ -63,7 +63,6 @@ class MonthScreen extends StatelessWidget {
   }
 }
 
-
 // 일정 수정 다이얼로그 함수 : showEditDialog()
 void showEditDialog(BuildContext context, String username, dynamic appointment) {
   final TextEditingController titleController =
@@ -287,7 +286,7 @@ Future<bool> insertSchedule(
     'subject': subject,
     'start': formatDateTime(start),
     'end': formatDateTime(end),
-    'color': 'blue', // 필요에 따라 색상 설정
+    'color': 'skyblue', // 하늘색으로 고정
   };
 
   try {
@@ -324,7 +323,7 @@ Future<bool> editSchedule(String username, DateTime oldStart, DateTime oldEnd,
     'new_start': formatDateTime(newStart),
     'new_end': formatDateTime(newEnd),
     'new_subject': newSubject,
-    'new_color': 'blue', // 필요에 따라 색상 설정
+    'new_color': 'skyblue', // 하늘색으로 고정
   };
 
   try {
